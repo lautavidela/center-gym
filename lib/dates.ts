@@ -32,6 +32,14 @@ export function formatDate(d: Date | string | null | undefined): string {
   return `${day}/${m}/${date.getFullYear()}`;
 }
 
+export function formatTime(d: Date | string | null | undefined): string {
+  if (!d) return "—";
+  const date = typeof d === "string" ? new Date(d) : d;
+  const h = String(date.getHours()).padStart(2, "0");
+  const min = String(date.getMinutes()).padStart(2, "0");
+  return `${h}:${min}`;
+}
+
 export function formatDateTime(d: Date | string | null | undefined): string {
   if (!d) return "—";
   const date = typeof d === "string" ? new Date(d) : d;

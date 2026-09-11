@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { activeMembershipInclude, type ClientWithMembership } from "@/lib/membership";
-import { addDays, daysUntil, formatDate, formatMoney, startOfDay, toDateKey } from "@/lib/dates";
+import { daysUntil, formatDate, formatMoney, startOfDay, toDateKey } from "@/lib/dates";
 import StatusBadge from "@/components/status-badge";
 import { computeStatus, type ClientStatus } from "@/lib/status";
 
@@ -43,8 +43,6 @@ function StatCard({
 export default async function DashboardPage() {
   const now = new Date();
   const today = startOfDay(now);
-  const in7 = addDays(today, 7);
-  const in30 = addDays(today, 30);
   const startMonth = startOfDay(new Date(now.getFullYear(), now.getMonth(), 1));
   const startNextMonth = startOfDay(
     new Date(now.getFullYear(), now.getMonth() + 1, 1)

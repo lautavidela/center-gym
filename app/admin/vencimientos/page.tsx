@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { activeMembershipInclude, type ClientWithMembership } from "@/lib/membership";
-import { addDays, daysUntil, formatDate, startOfDay } from "@/lib/dates";
+import { daysUntil, formatDate, startOfDay } from "@/lib/dates";
 import StatusBadge from "@/components/status-badge";
 import QuickPayForm from "@/components/quick-pay-form";
 

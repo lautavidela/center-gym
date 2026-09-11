@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
+import Link from "next/link";
 import type { Plan } from "@prisma/client";
 import { formatMoney } from "@/lib/dates";
 import type { ClientFormState } from "@/app/admin/actions/clients";
@@ -116,12 +117,12 @@ export default function ClientForm({
       </div>
 
       <div className="mt-6 flex items-center justify-end gap-3">
-        <a
+        <Link
           href="/admin/clientes"
           className="rounded-lg border border-zinc-200 px-4 py-2 text-sm font-medium text-zinc-600 hover:bg-zinc-100"
         >
           Cancelar
-        </a>
+        </Link>
         <button
           type="submit"
           disabled={isPending}
