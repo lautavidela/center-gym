@@ -31,6 +31,12 @@ async function main() {
   }
 
   const now = new Date();
+
+  if (process.env.SEED_SKIP_DEMO === "1") {
+    console.log("Seed listo (sin clientes demo). Admin:", adminEmail);
+    return;
+  }
+
   const sampleClients = [
     { dni: "30111222", name: "Juan Pérez", phone: "11 5555 1001", plan: "Mensual", offset: -10 },
     { dni: "27888999", name: "María González", phone: "11 5555 1002", plan: "Trimestral", offset: -40 },
