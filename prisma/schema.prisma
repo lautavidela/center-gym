@@ -1,0 +1,78 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           Int      @id @default(autoincrement())
+  email        String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+}
+
+model Plan {
+  id           Int          @id @default(autoincrement())
+  name         String
+  durationDays Int
+  price        Float        @default(0)
+  isActive     Boolean      @default(true)
+  createdAt    DateTime     @default(now())
+  memberships  Membership[]
+  payments     Payment[]
+}
+
+model Client {
+  id         Int           @id @default(autoincrement())
+  dni        String?       @unique
+  name       String
+  phone      String?
+  email      String?
+  notes      String?
+  isSuspended Boolean      @default(false)
+  createdAt  DateTime      @default(now())
+  memberships Membership[]
+  payments    Payment[]
+  attendances Attendance[]
+}
+
+model Membership {
+  id        Int      @id @default(autoincrement())
+  clientId  Int
+  planId    Int?
+  startDate DateTime
+  endDate   DateTime
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  client    Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  plan      Plan?    @relation(fields: [planId], references: [id], onDelete: SetNull)
+  payments  Payment[]
+}
+
+model Payment {
+  id           Int        @id @default(autoincrement())
+  clientId     Int
+  planId       Int
+  membershipId Int?
+  amount       Float
+  method       String     @default("efectivo")
+  paidAt       DateTime   @default(now())
+  notes        String?
+  createdAt    DateTime   @default(now())
+  client       Client     @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  plan         Plan       @relation(fields: [planId], references: [id], onDelete: Restrict)
+  membership   Membership? @relation(fields: [membershipId], references: [id], onDelete: SetNull)
+}
+
+model Attendance {
+  id        Int      @id @default(autoincrement())
+  clientId  Int
+  day       String
+  dateTime  DateTime @default(now())
+  client    Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@unique([clientId, day])
+}
