@@ -22,7 +22,7 @@ export default async function EditarClientePage({
 
   return (
     <div className="mx-auto max-w-5xl">
-      <h1 className="mb-6 text-2xl font-black">Editar cliente</h1>
+      <h1 className="mb-6 text-xl font-black sm:text-2xl">Editar cliente</h1>
       <ClientForm
         action={updateClient.bind(null, client.id)}
         plans={plans}

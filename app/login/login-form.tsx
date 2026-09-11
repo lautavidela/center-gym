@@ -14,7 +14,7 @@ export default function LoginForm() {
       action={formAction}
       className="w-full max-w-sm rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm"
     >
-      <h1 className="text-2xl font-black">Ingreso</h1>
+      <h1 className="text-xl font-black sm:text-2xl">Ingreso</h1>
       <p className="mb-5 mt-1 text-sm text-zinc-500">Panel del gimnasio</p>
 
       {state.error && (

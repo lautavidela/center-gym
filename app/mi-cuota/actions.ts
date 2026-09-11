@@ -2,6 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { daysUntil, formatDate, startOfDay } from "@/lib/dates";
+import { formatClassesLabel } from "@/lib/plans";
 
 export type ConsultaResult = {
   ok: boolean;
@@ -10,6 +11,7 @@ export type ConsultaResult = {
     name: string;
     phone: string | null;
     plan: string | null;
+    planDetail: string | null;
     startDate: string;
     endDate: string;
     status: "al-dia" | "vence-hoy" | "vencido";
@@ -77,6 +79,9 @@ export async function consultarSocio(
       name: client.name,
       phone: client.phone,
       plan: membership.plan?.name ?? null,
+      planDetail: membership.plan
+        ? formatClassesLabel(membership.plan.classesPerMonth)
+        : null,
       startDate: formatDate(membership.startDate),
       endDate: formatDate(membership.endDate),
       status,

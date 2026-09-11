@@ -27,7 +27,7 @@ export default async function AsistenciasPage({
   return (
     <div className="mx-auto max-w-5xl">
       <div className="mb-6">
-        <h1 className="text-2xl font-black">Asistencias</h1>
+        <h1 className="text-xl font-black sm:text-2xl">Asistencias</h1>
         <p className="text-sm text-zinc-500">Control de ingresos por día.</p>
       </div>
 

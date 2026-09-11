@@ -68,7 +68,7 @@ export default async function VencimientosPage({
   return (
     <div className="mx-auto max-w-5xl">
       <div className="mb-6">
-        <h1 className="text-2xl font-black">Vencimientos</h1>
+        <h1 className="text-xl font-black sm:text-2xl">Vencimientos</h1>
         <p className="text-sm text-zinc-500">
           Quiénes están al día, quiénes vencen y quiénes deben.
         </p>

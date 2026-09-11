@@ -59,7 +59,6 @@ export async function registerPayment(
 
   const { startDate, endDate } = computeMembershipDates(
     paidAt,
-    plan.durationDays,
     current?.endDate ?? null
   );
 

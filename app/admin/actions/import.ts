@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth";
 import {
-  addDays,
+  addMonths,
   parseDni,
   parseExcelDate,
   startOfDay,
@@ -129,10 +129,10 @@ export async function importClients(
     let endDate: Date | null = null;
     if (venc) {
       endDate = venc;
-      startDate = plan ? addDays(venc, -plan.durationDays) : today;
+      startDate = plan ? addMonths(venc, -1) : today;
     } else if (plan) {
       startDate = today;
-      endDate = addDays(today, plan.durationDays);
+      endDate = addMonths(today, 1);
     }
 
     const client = await prisma.client.create({

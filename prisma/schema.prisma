@@ -16,14 +16,14 @@ model User {
 }
 
 model Plan {
-  id           Int          @id @default(autoincrement())
-  name         String
-  durationDays Int
-  price        Float        @default(0)
-  isActive     Boolean      @default(true)
-  createdAt    DateTime     @default(now())
-  memberships  Membership[]
-  payments     Payment[]
+  id             Int          @id @default(autoincrement())
+  name           String
+  classesPerMonth Int
+  price          Float        @default(0)
+  isActive       Boolean      @default(true)
+  createdAt      DateTime     @default(now())
+  memberships    Membership[]
+  payments       Payment[]
 }
 
 model Client {

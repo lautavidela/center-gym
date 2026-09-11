@@ -15,7 +15,7 @@ export default async function PlanesPage() {
   return (
     <div className="mx-auto max-w-4xl">
       <div className="mb-6">
-        <h1 className="text-2xl font-black">Planes</h1>
+        <h1 className="text-xl font-black sm:text-2xl">Planes</h1>
         <p className="text-sm text-zinc-500">
           Definen la duración y el precio de cada membresía.
         </p>

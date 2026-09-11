@@ -8,9 +8,9 @@ export const metadata: Metadata = {
 
 export default function MiCuotaPage() {
   return (
-    <main className="flex flex-1 flex-col items-center justify-center gap-8 p-6">
-      <div className="text-center">
-        <h1 className="text-4xl font-black tracking-tight">
+    <main className="flex flex-1 flex-col items-center justify-center gap-8 p-4 sm:p-6">
+      <div className="w-full max-w-md">
+        <h1 className="break-words text-3xl font-black tracking-tight sm:text-4xl">
           <span className="bg-gradient-to-r from-red-600 to-orange-500 bg-clip-text text-transparent">
             CENTER GYM
           </span>

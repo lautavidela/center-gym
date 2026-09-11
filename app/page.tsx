@@ -2,9 +2,9 @@ import Link from "next/link";
 
 export default function Home() {
   return (
-    <main className="flex flex-1 flex-col items-center justify-center gap-10 p-8">
-      <div className="text-center">
-        <h1 className="text-5xl font-black tracking-tight">
+    <main className="flex flex-1 flex-col items-center justify-center gap-10 p-4 sm:p-8">
+      <div className="max-w-full px-1 text-center">
+        <h1 className="break-words text-4xl font-black tracking-tight sm:text-5xl">
           <span className="bg-gradient-to-r from-red-600 to-orange-500 bg-clip-text text-transparent">
             CENTER GYM
           </span>

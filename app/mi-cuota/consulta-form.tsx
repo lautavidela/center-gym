@@ -30,12 +30,12 @@ export default function ConsultaForm() {
           inputMode="numeric"
           autoComplete="off"
           placeholder="Ingresá tu DNI"
-          className="flex-1 rounded-xl px-4 py-3 text-lg outline-none focus:ring-2 focus:ring-red-500"
+          className="min-w-0 flex-1 rounded-xl px-3 py-3 text-base outline-none focus:ring-2 focus:ring-red-500 sm:px-4 sm:text-lg"
         />
         <button
           type="submit"
           disabled={isPending}
-          className="rounded-xl bg-red-600 px-6 py-3 font-semibold text-white transition hover:bg-red-700 disabled:opacity-50"
+          className="shrink-0 rounded-xl bg-red-600 px-4 py-3 font-semibold text-white transition hover:bg-red-700 disabled:opacity-50 sm:px-6"
         >
           {isPending ? "…" : "Buscar"}
         </button>
@@ -49,15 +49,15 @@ export default function ConsultaForm() {
 
       {state?.ok && state.client && (
         <div className="mt-4 overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm">
-          <div className="px-6 py-5 text-center">
-            <p className="text-xl font-bold">{state.client.name}</p>
+          <div className="px-5 py-5 text-center sm:px-6 sm:py-5">
+            <p className="break-words text-lg font-bold sm:text-xl">{state.client.name}</p>
             <p className="text-sm text-zinc-500">
               DNI consultado para su membresía
             </p>
           </div>
 
           <div
-            className={`px-6 py-4 text-white ${
+            className={`px-5 py-4 text-white sm:px-6 ${
               state.client.status === "vencido"
                 ? "bg-red-600"
                 : state.client.status === "vence-hoy"
@@ -65,7 +65,7 @@ export default function ConsultaForm() {
                   : "bg-emerald-600"
             }`}
           >
-            <p className="text-3xl font-black">
+            <p className="break-words text-2xl font-black sm:text-3xl">
               {state.client.daysLeft >= 0
                 ? `${state.client.daysLeft} día${state.client.daysLeft === 1 ? "" : "s"} restantes`
                 : `Vencido hace ${Math.abs(state.client.daysLeft)} día${Math.abs(state.client.daysLeft) === 1 ? "" : "s"}`}
@@ -79,33 +79,38 @@ export default function ConsultaForm() {
             </p>
           </div>
 
-          <dl className="divide-y divide-zinc-100 px-6 text-sm">
-            <div className="flex justify-between py-3">
-              <dt className="text-zinc-500">Plan</dt>
-              <dd className="font-semibold">{state.client.plan ?? "—"}</dd>
+          <dl className="divide-y divide-zinc-100 px-5 text-sm sm:px-6">
+            <div className="flex items-center justify-between gap-3 py-3">
+              <dt className="shrink-0 text-zinc-500">Plan</dt>
+              <dd className="text-right">
+              <span className="font-semibold">{state.client.plan ?? "—"}</span>
+              {state.client.planDetail && (
+                <span className="block text-xs font-normal text-zinc-500">
+                  {state.client.planDetail}
+                </span>
+              )}
+            </dd>
             </div>
-            <div className="flex justify-between py-3">
-              <dt className="text-zinc-500">Desde</dt>
-              <dd>{state.client.startDate}</dd>
+            <div className="flex items-center justify-between gap-3 py-3">
+              <dt className="shrink-0 text-zinc-500">Desde</dt>
+              <dd className="text-right">{state.client.startDate}</dd>
             </div>
-            <div className="flex justify-between py-3">
-              <dt className="text-zinc-500">Vencimiento</dt>
-              <dd className="font-semibold">{state.client.endDate}</dd>
+            <div className="flex items-center justify-between gap-3 py-3">
+              <dt className="shrink-0 text-zinc-500">Vencimiento</dt>
+              <dd className="text-right font-semibold">{state.client.endDate}</dd>
             </div>
           </dl>
 
           {state.client.payments.length > 0 && (
-            <div className="border-t border-zinc-100 px-6 py-4">
+            <div className="border-t border-zinc-100 px-5 py-4 sm:px-6">
               <p className="mb-2 text-xs font-bold uppercase tracking-wide text-zinc-400">
                 Últimos pagos
               </p>
               <ul className="space-y-1 text-sm text-zinc-700">
                 {state.client.payments.map((p, i) => (
-                  <li key={i} className="flex justify-between">
-                    <span>
-                      {p.date} · {p.plan}
-                    </span>
-                    <span className="font-medium">{weights(p.amount)}</span>
+                  <li key={i} className="flex items-center justify-between gap-3">
+                    <span className="break-words">{p.date} · {p.plan}</span>
+                    <span className="shrink-0 font-medium">{weights(p.amount)}</span>
                   </li>
                 ))}
               </ul>

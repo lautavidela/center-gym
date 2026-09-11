@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth";
-import { addDays, parseDni, parseExcelDate, startOfDay } from "@/lib/dates";
+import { addMonths, parseDni, parseExcelDate, startOfDay } from "@/lib/dates";
 
 export type ClientFormState = { error?: string };
 
@@ -13,8 +13,7 @@ async function makeMembership(clientId: number, planId: number) {
   if (!plan) return;
 
   const today = startOfDay(new Date());
-  const endDate = new Date(today);
-  endDate.setDate(endDate.getDate() + plan.durationDays);
+  const endDate = addMonths(today, 1);
 
   const membership = await prisma.membership.create({
     data: {
@@ -144,7 +143,7 @@ export async function addManualMembership(
 
   let endDate: Date | null = endRaw && parseExcelDate(endRaw) ? parseExcelDate(endRaw) : null;
   if (!endDate) {
-    endDate = addDays(startDate, plan.durationDays);
+    endDate = addMonths(startDate, 1);
   }
 
   await prisma.membership.updateMany({

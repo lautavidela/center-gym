@@ -12,16 +12,16 @@ export async function createPlan(
 ): Promise<PlanFormState> {
   await requireAdmin();
   const name = String(formData.get("name") ?? "").trim();
-  const durationDays = Number(formData.get("durationDays"));
+  const classesPerMonth = Number(formData.get("classesPerMonth"));
   const price = Number(formData.get("price")) || 0;
 
   if (!name) return { error: "El nombre del plan es obligatorio." };
-  if (!Number.isInteger(durationDays) || durationDays <= 0)
-    return { error: "La duración debe ser un número de días mayor a 0." };
+  if (!Number.isInteger(classesPerMonth) || classesPerMonth <= 0)
+    return { error: "Las clases por mes deben ser un número mayor a 0." };
   if (price < 0) return { error: "El precio no puede ser negativo." };
 
   await prisma.plan.create({
-    data: { name, durationDays, price },
+    data: { name, classesPerMonth, price },
   });
   revalidatePath("/admin/planes");
   return {};
@@ -34,17 +34,17 @@ export async function updatePlan(
 ): Promise<PlanFormState> {
   await requireAdmin();
   const name = String(formData.get("name") ?? "").trim();
-  const durationDays = Number(formData.get("durationDays"));
+  const classesPerMonth = Number(formData.get("classesPerMonth"));
   const price = Number(formData.get("price")) || 0;
 
   if (!name) return { error: "El nombre del plan es obligatorio." };
-  if (!Number.isInteger(durationDays) || durationDays <= 0)
-    return { error: "La duración debe ser un número de días mayor a 0." };
+  if (!Number.isInteger(classesPerMonth) || classesPerMonth <= 0)
+    return { error: "Las clases por mes deben ser un número mayor a 0." };
   if (price < 0) return { error: "El precio no puede ser negativo." };
 
   await prisma.plan.update({
     where: { id },
-    data: { name, durationDays, price },
+    data: { name, classesPerMonth, price },
   });
   revalidatePath("/admin/planes");
   return {};

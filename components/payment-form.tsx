@@ -2,8 +2,7 @@
 
 import { useState, useActionState } from "react";
 import type { Plan } from "@prisma/client";
-import { formatMoney } from "@/lib/dates";
-import { formatDurationLabel } from "@/lib/plans";
+import { formatPlanOption } from "@/lib/plans";
 import {
   registerPayment,
   type PaymentFormState,
@@ -64,8 +63,7 @@ export default function PaymentForm({
           >
             {plans.map((p) => (
               <option key={p.id} value={p.id}>
-                {p.name} · {formatDurationLabel(p.durationDays)} ·{" "}
-                {formatMoney(p.price)}
+                {formatPlanOption(p)}
               </option>
             ))}
           </select>

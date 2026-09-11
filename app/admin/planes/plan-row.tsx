@@ -2,7 +2,8 @@
 
 import { useState, useActionState } from "react";
 import type { Plan } from "@prisma/client";
-import { formatDuration, formatMoney } from "@/lib/dates";
+import { formatMoney } from "@/lib/dates";
+import { formatClassesLabel } from "@/lib/plans";
 import {
   deletePlan,
   togglePlanActive,
@@ -30,7 +31,7 @@ export default function PlanRow({ plan }: { plan: Plan }) {
             )}
           </div>
           <p className="text-sm text-zinc-500">
-            {formatDuration(plan.durationDays)} · {formatMoney(plan.price)}
+            {formatClassesLabel(plan.classesPerMonth)} · {formatMoney(plan.price)}
           </p>
         </div>
 
@@ -91,13 +92,13 @@ export default function PlanRow({ plan }: { plan: Plan }) {
               />
             </label>
             <label className="block text-sm font-medium text-zinc-700">
-              Duración (días)
+              Clases por mes
               <input
                 type="number"
-                name="durationDays"
+                name="classesPerMonth"
                 required
                 min="1"
-                defaultValue={plan.durationDays}
+                defaultValue={plan.classesPerMonth}
                 className="mt-1 w-full rounded-lg border border-zinc-300 px-3 py-2 outline-none focus:ring-2 focus:ring-red-500"
               />
             </label>

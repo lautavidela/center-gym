@@ -42,7 +42,7 @@ export default async function ClientesPage({
     <div className="mx-auto max-w-5xl">
       <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-black">Clientes</h1>
+          <h1 className="text-xl font-black sm:text-2xl">Clientes</h1>
           <p className="text-sm text-zinc-500">
             {clients.length} socio{clients.length === 1 ? "" : "s"}
           </p>

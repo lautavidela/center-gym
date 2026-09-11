@@ -27,18 +27,18 @@ export default function PlanForm() {
             type="text"
             name="name"
             required
-            placeholder="Ej: Mensual, Trimestral…"
+            placeholder="Ej: Mensual 3 días…"
             className="mt-1 w-full rounded-lg border border-zinc-300 px-3 py-2 outline-none focus:ring-2 focus:ring-red-500"
           />
         </label>
         <label className="block text-sm font-medium text-zinc-700">
-          Duración (días)
+          Clases por mes
           <input
             type="number"
-            name="durationDays"
+            name="classesPerMonth"
             required
             min="1"
-            placeholder="30"
+            placeholder="12"
             className="mt-1 w-full rounded-lg border border-zinc-300 px-3 py-2 outline-none focus:ring-2 focus:ring-red-500"
           />
         </label>

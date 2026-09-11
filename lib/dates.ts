@@ -12,6 +12,12 @@ export function addDays(d: Date, days: number): Date {
   return r;
 }
 
+export function addMonths(d: Date, months: number): Date {
+  const r = new Date(d);
+  r.setMonth(r.getMonth() + months);
+  return r;
+}
+
 export function toDateKey(d: Date): string {
   const y = d.getFullYear();
   const m = String(d.getMonth() + 1).padStart(2, "0");
@@ -58,19 +64,12 @@ export function daysUntil(from: Date, to: Date): number {
 
 export function computeMembershipDates(
   now: Date,
-  durationDays: number,
   currentEndDate?: Date | null
 ): { startDate: Date; endDate: Date } {
   const today = startOfDay(now);
   const base =
     currentEndDate && currentEndDate >= today ? currentEndDate : today;
-  return { startDate: base, endDate: addDays(base, durationDays) };
-}
-
-export function addMonths(d: Date, months: number): Date {
-  const r = new Date(d);
-  r.setMonth(r.getMonth() + months);
-  return r;
+  return { startDate: base, endDate: addMonths(base, 1) };
 }
 
 export function formatMoney(amount: number): string {
@@ -80,18 +79,6 @@ export function formatMoney(amount: number): string {
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
   });
-}
-
-export function formatDuration(days: number): string {
-  if (days % 365 === 0) {
-    const years = days / 365;
-    return years === 1 ? "1 año" : `${years} años`;
-  }
-  if (days % 30 === 0) {
-    const months = days / 30;
-    return months === 1 ? "1 mes" : `${months} meses`;
-  }
-  return `${days} días`;
 }
 
 export function parseExcelDate(value: unknown): Date | null {

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { activeMembershipInclude, type ClientWithMembership } from "@/lib/membership";
-import { daysUntil, formatDate, formatMoney, startOfDay, toDateKey } from "@/lib/dates";
+import { daysUntil, formatDate, startOfDay, toDateKey } from "@/lib/dates";
 import StatusBadge from "@/components/status-badge";
 import { computeStatus, type ClientStatus } from "@/lib/status";
 
@@ -26,7 +26,7 @@ function StatCard({
   const inner = (
     <>
       <p className="text-sm font-medium text-zinc-500">{label}</p>
-      <p className="mt-1 text-3xl font-black">{value}</p>
+      <p className="mt-1 text-2xl font-black sm:text-3xl">{value}</p>
     </>
   );
   const cls = `rounded-2xl border p-5 shadow-sm ${tone}`;
@@ -43,19 +43,11 @@ function StatCard({
 export default async function DashboardPage() {
   const now = new Date();
   const today = startOfDay(now);
-  const startMonth = startOfDay(new Date(now.getFullYear(), now.getMonth(), 1));
-  const startNextMonth = startOfDay(
-    new Date(now.getFullYear(), now.getMonth() + 1, 1)
-  );
 
-  const [clients, monthAgg, attendanceToday] = await Promise.all([
+  const [clients, attendanceToday] = await Promise.all([
     prisma.client.findMany({
       include: activeMembershipInclude,
       orderBy: { name: "asc" },
-    }),
-    prisma.payment.aggregate({
-      _sum: { amount: true },
-      where: { paidAt: { gte: startMonth, lt: startNextMonth } },
     }),
     prisma.attendance.count({ where: { day: toDateKey(today) } }),
   ]);
@@ -85,18 +77,24 @@ export default async function DashboardPage() {
     .sort((a, b) => b.until - a.until)
     .slice(0, 8);
 
-  const income = monthAgg._sum.amount ?? 0;
-
   return (
     <div className="mx-auto max-w-6xl">
-      <div className="mb-6">
-        <h1 className="text-2xl font-black">Panel</h1>
-        <p className="text-sm text-zinc-500">
-          {formatDate(now)} · Bienvenido al gimnasio
-        </p>
+      <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h1 className="text-xl font-black sm:text-2xl">Panel</h1>
+          <p className="text-sm text-zinc-500">
+            {formatDate(now)} · Bienvenido al gimnasio
+          </p>
+        </div>
+        <Link
+          href="/admin/ingresos"
+          className="text-sm font-medium text-red-600 hover:text-red-700"
+        >
+          Ingresos →
+        </Link>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-5">
         <StatCard
           label="Socios al día"
           value={active}
@@ -120,11 +118,6 @@ export default async function DashboardPage() {
           value={expired.length}
           tone="border-red-200 bg-red-50"
           href="/admin/vencimientos?f=vencidos"
-        />
-        <StatCard
-          label="Ingresos del mes"
-          value={formatMoney(income)}
-          tone="border-zinc-200 bg-white"
         />
         <StatCard
           label="Asistencias hoy"

@@ -2,8 +2,7 @@
 
 import { useActionState } from "react";
 import type { Plan } from "@prisma/client";
-import { formatMoney } from "@/lib/dates";
-import { formatDurationLabel } from "@/lib/plans";
+import { formatPlanOption } from "@/lib/plans";
 import {
   addManualMembership,
   type ClientFormState,
@@ -46,8 +45,7 @@ export default function ManualMembershipForm({
           >
             {plans.map((p) => (
               <option key={p.id} value={p.id}>
-                {p.name} · {formatDurationLabel(p.durationDays)} ·{" "}
-                {formatMoney(p.price)}
+                {formatPlanOption(p)}
               </option>
             ))}
           </select>

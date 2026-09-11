@@ -9,7 +9,7 @@ export default function MigracionPage() {
   return (
     <div className="mx-auto max-w-4xl">
       <div className="mb-6">
-        <h1 className="text-2xl font-black">Migración desde Excel</h1>
+        <h1 className="text-xl font-black sm:text-2xl">Migración desde Excel</h1>
         <p className="text-sm text-zinc-500">
           Cargá el Excel del gimnasio una sola vez y traé a todos tus socios.
           Reviso el resultado antes de confirmar.

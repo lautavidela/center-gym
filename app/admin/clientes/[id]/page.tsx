@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { computeStatus } from "@/lib/status";
 import { daysUntil, formatDate, formatDateTime, formatMoney } from "@/lib/dates";
+import { formatClassesLabel } from "@/lib/plans";
 import StatusBadge from "@/components/status-badge";
 import PaymentForm from "@/components/payment-form";
 import ManualMembershipForm from "@/components/manual-membership-form";
@@ -50,7 +51,7 @@ export default async function ClientePage({
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <div className="flex flex-wrap items-center gap-3">
-              <h1 className="text-2xl font-black">{client.name}</h1>
+              <h1 className="break-words text-xl font-black sm:text-2xl">{client.name}</h1>
               <StatusBadge status={status} />
             </div>
             <div className="mt-2 flex flex-wrap gap-x-6 gap-y-1 text-sm text-zinc-500">
@@ -75,6 +76,11 @@ export default async function ClientePage({
                 Plan
               </p>
               <p className="font-semibold">{current.plan?.name ?? "—"}</p>
+              {current.plan && (
+                <p className="text-xs font-normal text-zinc-500">
+                  {formatClassesLabel(current.plan.classesPerMonth)}
+                </p>
+              )}
             </div>
             <div>
               <p className="text-xs font-bold uppercase tracking-wide text-zinc-400">

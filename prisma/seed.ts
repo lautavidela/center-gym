@@ -1,6 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import { hashPassword } from "../lib/crypto";
-import { addDays, toDateKey } from "../lib/dates";
+import { addMonths, toDateKey } from "../lib/dates";
 
 const prisma = new PrismaClient();
 
@@ -15,19 +15,32 @@ async function main() {
   });
 
   const planData = [
-    { name: "Mensual", durationDays: 30, price: 25000 },
-    { name: "Trimestral", durationDays: 90, price: 66000 },
-    { name: "Anual", durationDays: 365, price: 240000 },
+    { name: "Mensual 3 días", classesPerMonth: 12, price: 25000 },
+    { name: "Mensual todos los días", classesPerMonth: 20, price: 30000 },
   ];
+
+  const planNames = planData.map((p) => p.name);
 
   const plans: Record<string, number> = {};
   for (const p of planData) {
     const existing = await prisma.plan.findFirst({ where: { name: p.name } });
     let plan = existing;
-    if (!plan) {
+    if (plan) {
+      plan = await prisma.plan.update({
+        where: { id: plan.id },
+        data: { classesPerMonth: p.classesPerMonth, price: p.price },
+      });
+    } else {
       plan = await prisma.plan.create({ data: p });
     }
     plans[p.name] = plan.id;
+  }
+
+  const stale = await prisma.plan.deleteMany({
+    where: { name: { notIn: planNames } },
+  });
+  if (stale.count > 0) {
+    console.log(`Planes viejos eliminados: ${stale.count}`);
   }
 
   const now = new Date();
@@ -38,15 +51,15 @@ async function main() {
   }
 
   const sampleClients = [
-    { dni: "30111222", name: "Juan Pérez", phone: "11 5555 1001", plan: "Mensual", offset: -10 },
-    { dni: "27888999", name: "María González", phone: "11 5555 1002", plan: "Trimestral", offset: -40 },
-    { dni: "33444555", name: "Carlos Rodríguez", phone: "11 5555 1003", plan: "Anual", offset: -120 },
-    { dni: "35111222", name: "Lucía Fernández", phone: "11 5555 1004", plan: "Mensual", offset: -32 },
-    { dni: "26999888", name: "Pedro Martínez", phone: "11 5555 1005", plan: "Trimestral", offset: -70 },
-    { dni: "29888777", name: "Sofía López", phone: "11 5555 1006", plan: "Mensual", offset: -2 },
-    { dni: "31111222", name: "Lucas Díaz", phone: "11 5555 1007", plan: "Mensual", offset: -8 },
-    { dni: "35888999", name: "Valentina Torres", phone: "11 5555 1008", plan: "Anual", offset: -200 },
-    { dni: "27444555", name: "Martín Sosa", phone: "11 5555 1009", plan: "Mensual", offset: -25 },
+    { dni: "30111222", name: "Juan Pérez", phone: "11 5555 1001", plan: "Mensual 3 días", offset: -10 },
+    { dni: "27888999", name: "María González", phone: "11 5555 1002", plan: "Mensual todos los días", offset: -40 },
+    { dni: "33444555", name: "Carlos Rodríguez", phone: "11 5555 1003", plan: "Mensual todos los días", offset: -120 },
+    { dni: "35111222", name: "Lucía Fernández", phone: "11 5555 1004", plan: "Mensual 3 días", offset: -32 },
+    { dni: "26999888", name: "Pedro Martínez", phone: "11 5555 1005", plan: "Mensual todos los días", offset: -70 },
+    { dni: "29888777", name: "Sofía López", phone: "11 5555 1006", plan: "Mensual 3 días", offset: -2 },
+    { dni: "31111222", name: "Lucas Díaz", phone: "11 5555 1007", plan: "Mensual 3 días", offset: -8 },
+    { dni: "35888999", name: "Valentina Torres", phone: "11 5555 1008", plan: "Mensual todos los días", offset: -200 },
+    { dni: "27444555", name: "Martín Sosa", phone: "11 5555 1009", plan: "Mensual 3 días", offset: -25 },
   ];
 
   for (const c of sampleClients) {
@@ -74,7 +87,7 @@ async function main() {
       0,
       0
     );
-    const endDate = addDays(startDate, plan.durationDays);
+    const endDate = addMonths(startDate, 1);
 
     const membership = await prisma.membership.create({
       data: {
