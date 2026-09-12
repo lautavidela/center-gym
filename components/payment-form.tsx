@@ -59,7 +59,7 @@ export default function PaymentForm({
               const p = plans.find((x) => x.id === Number(e.target.value));
               setAmount(p ? p.price : null);
             }}
-            className="mt-1 w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 outline-none focus:ring-2 focus:ring-red-500"
+            className="mt-1 w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 outline-none focus:ring-2 focus:ring-emerald-500"
           >
             {plans.map((p) => (
               <option key={p.id} value={p.id}>
@@ -79,7 +79,7 @@ export default function PaymentForm({
             onChange={(e) =>
               setAmount(e.target.value === "" ? null : Number(e.target.value))
             }
-            className="mt-1 w-full rounded-lg border border-zinc-300 px-3 py-2 outline-none focus:ring-2 focus:ring-red-500"
+            className="mt-1 w-full rounded-lg border border-zinc-300 px-3 py-2 outline-none focus:ring-2 focus:ring-emerald-500"
           />
         </label>
         <label className="block text-sm font-medium text-zinc-700">
@@ -87,7 +87,7 @@ export default function PaymentForm({
           <select
             name="method"
             defaultValue="efectivo"
-            className="mt-1 w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 outline-none focus:ring-2 focus:ring-red-500"
+            className="mt-1 w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 outline-none focus:ring-2 focus:ring-emerald-500"
           >
             <option value="efectivo">Efectivo</option>
             <option value="transferencia">Transferencia</option>
@@ -100,7 +100,7 @@ export default function PaymentForm({
           <input
             type="date"
             name="paidAt"
-            className="mt-1 w-full rounded-lg border border-zinc-300 px-3 py-2 outline-none focus:ring-2 focus:ring-red-500"
+            className="mt-1 w-full rounded-lg border border-zinc-300 px-3 py-2 outline-none focus:ring-2 focus:ring-emerald-500"
           />
         </label>
         <label className="block text-sm font-medium text-zinc-700">
@@ -108,7 +108,7 @@ export default function PaymentForm({
           <input
             type="text"
             name="notes"
-            className="mt-1 w-full rounded-lg border border-zinc-300 px-3 py-2 outline-none focus:ring-2 focus:ring-red-500"
+            className="mt-1 w-full rounded-lg border border-zinc-300 px-3 py-2 outline-none focus:ring-2 focus:ring-emerald-500"
           />
         </label>
       </div>

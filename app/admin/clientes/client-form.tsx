@@ -53,7 +53,7 @@ export default function ClientForm({
             inputMode="numeric"
             required
             defaultValue={defaults?.dni}
-            className="mt-1 w-full rounded-lg border border-zinc-300 px-3 py-2 outline-none focus:ring-2 focus:ring-red-500"
+            className="mt-1 w-full rounded-lg border border-zinc-300 px-3 py-2 outline-none focus:ring-2 focus:ring-emerald-500"
           />
         </label>
         <label className="block text-sm font-medium text-zinc-700">
@@ -64,7 +64,7 @@ export default function ClientForm({
             required
             defaultValue={defaults?.name}
             placeholder="Juan Pérez"
-            className="mt-1 w-full rounded-lg border border-zinc-300 px-3 py-2 outline-none focus:ring-2 focus:ring-red-500"
+            className="mt-1 w-full rounded-lg border border-zinc-300 px-3 py-2 outline-none focus:ring-2 focus:ring-emerald-500"
           />
         </label>
         <label className="block text-sm font-medium text-zinc-700">
@@ -74,7 +74,7 @@ export default function ClientForm({
             name="phone"
             defaultValue={defaults?.phone ?? ""}
             placeholder="11 5555 5555"
-            className="mt-1 w-full rounded-lg border border-zinc-300 px-3 py-2 outline-none focus:ring-2 focus:ring-red-500"
+            className="mt-1 w-full rounded-lg border border-zinc-300 px-3 py-2 outline-none focus:ring-2 focus:ring-emerald-500"
           />
         </label>
         <label className="block text-sm font-medium text-zinc-700">
@@ -84,7 +84,7 @@ export default function ClientForm({
             name="email"
             defaultValue={defaults?.email ?? ""}
             placeholder="cliente@mail.com"
-            className="mt-1 w-full rounded-lg border border-zinc-300 px-3 py-2 outline-none focus:ring-2 focus:ring-red-500"
+            className="mt-1 w-full rounded-lg border border-zinc-300 px-3 py-2 outline-none focus:ring-2 focus:ring-emerald-500"
           />
         </label>
         <label className="block text-sm font-medium text-zinc-700 sm:col-span-2">
@@ -93,7 +93,7 @@ export default function ClientForm({
             name="notes"
             rows={2}
             defaultValue={defaults?.notes ?? ""}
-            className="mt-1 w-full rounded-lg border border-zinc-300 px-3 py-2 outline-none focus:ring-2 focus:ring-red-500"
+            className="mt-1 w-full rounded-lg border border-zinc-300 px-3 py-2 outline-none focus:ring-2 focus:ring-emerald-500"
           />
         </label>
 
@@ -103,7 +103,7 @@ export default function ClientForm({
             <select
               name="planId"
               defaultValue=""
-              className="mt-1 w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 outline-none focus:ring-2 focus:ring-red-500"
+              className="mt-1 w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 outline-none focus:ring-2 focus:ring-emerald-500"
             >
               <option value="">Sin plan por ahora</option>
               {plans.map((p) => (
@@ -126,7 +126,7 @@ export default function ClientForm({
         <button
           type="submit"
           disabled={isPending}
-          className="rounded-lg bg-red-600 px-5 py-2 font-semibold text-white transition hover:bg-red-700 disabled:opacity-50"
+          className="rounded-lg bg-emerald-600 px-5 py-2 font-semibold text-white transition hover:bg-emerald-700 disabled:opacity-50"
         >
           {isPending ? "Guardando…" : submitLabel}
         </button>

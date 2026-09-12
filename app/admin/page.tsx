@@ -88,7 +88,7 @@ export default async function DashboardPage() {
         </div>
         <Link
           href="/admin/ingresos"
-          className="text-sm font-medium text-red-600 hover:text-red-700"
+          className="text-sm font-medium text-emerald-600 hover:text-emerald-700"
         >
           Ingresos →
         </Link>
@@ -133,7 +133,7 @@ export default async function DashboardPage() {
             <h2 className="font-bold">Próximos a vencer</h2>
             <Link
               href="/admin/vencimientos?f=7"
-              className="text-sm font-medium text-red-600 hover:text-red-700"
+              className="text-sm font-medium text-emerald-600 hover:text-emerald-700"
             >
               Ver todos →
             </Link>
@@ -183,7 +183,7 @@ export default async function DashboardPage() {
             <h2 className="font-bold">Vencidos</h2>
             <Link
               href="/admin/vencimientos?f=vencidos"
-              className="text-sm font-medium text-red-600 hover:text-red-700"
+              className="text-sm font-medium text-emerald-600 hover:text-emerald-700"
             >
               Ver todos →
             </Link>

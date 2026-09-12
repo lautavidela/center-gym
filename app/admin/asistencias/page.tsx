@@ -49,7 +49,7 @@ export default async function AsistenciasPage({
                 type="date"
                 name="d"
                 defaultValue={day}
-                className="rounded-lg border border-zinc-300 px-3 py-1.5 text-sm outline-none focus:ring-2 focus:ring-red-500"
+                className="rounded-lg border border-zinc-300 px-3 py-1.5 text-sm outline-none focus:ring-2 focus:ring-emerald-500"
               />
             </form>
           </div>

@@ -59,7 +59,7 @@ export default function AttendanceRegister() {
           value={query}
           onChange={(e) => search(e.target.value)}
           placeholder="Nombre o DNI…"
-          className="flex-1 rounded-lg border border-zinc-300 px-3 py-2 outline-none focus:ring-2 focus:ring-red-500"
+          className="flex-1 rounded-lg border border-zinc-300 px-3 py-2 outline-none focus:ring-2 focus:ring-emerald-500"
         />
       </div>
 

@@ -14,10 +14,11 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Center Gym",
-    template: "%s | Center Gym",
+    default: "MTGym",
+    template: "%s | MTGym",
   },
-  description: "Gestión de clientes, membresías y asistencias del gimnasio.",
+  description:
+    "MTGym — Monitoreá tu gym: gestión de socios, cuotas, asistencias e ingresos para tu gimnasio.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

@@ -41,7 +41,7 @@ export default function ManualMembershipForm({
           <select
             name="planId"
             required
-            className="mt-1 w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 outline-none focus:ring-2 focus:ring-red-500"
+            className="mt-1 w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 outline-none focus:ring-2 focus:ring-emerald-500"
           >
             {plans.map((p) => (
               <option key={p.id} value={p.id}>
@@ -55,7 +55,7 @@ export default function ManualMembershipForm({
           <input
             type="date"
             name="startDate"
-            className="mt-1 w-full rounded-lg border border-zinc-300 px-3 py-2 outline-none focus:ring-2 focus:ring-red-500"
+            className="mt-1 w-full rounded-lg border border-zinc-300 px-3 py-2 outline-none focus:ring-2 focus:ring-emerald-500"
           />
         </label>
         <label className="block text-sm font-medium text-zinc-700">
@@ -63,7 +63,7 @@ export default function ManualMembershipForm({
           <input
             type="date"
             name="endDate"
-            className="mt-1 w-full rounded-lg border border-zinc-300 px-3 py-2 outline-none focus:ring-2 focus:ring-red-500"
+            className="mt-1 w-full rounded-lg border border-zinc-300 px-3 py-2 outline-none focus:ring-2 focus:ring-emerald-500"
           />
         </label>
       </div>

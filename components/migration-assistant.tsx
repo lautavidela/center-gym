@@ -175,7 +175,7 @@ export default function MigrationAssistant() {
                   <select
                     value={mapping[f.key]}
                     onChange={(e) => setField(f.key, e.target.value)}
-                    className="w-full rounded-lg border border-zinc-300 px-3 py-2 outline-none focus:ring-2 focus:ring-red-500"
+                    className="w-full rounded-lg border border-zinc-300 px-3 py-2 outline-none focus:ring-2 focus:ring-emerald-500"
                   >
                     <option value="">— no importar —</option>
                     {Array.from({ length: headerCols }).map((_, i) => (
@@ -235,7 +235,7 @@ export default function MigrationAssistant() {
                 type="button"
                 disabled={busy || !mapping.nombre || dataRows.length === 0}
                 onClick={runImport}
-                className="rounded-xl bg-red-600 px-6 py-2.5 text-sm font-bold text-white transition hover:bg-red-700 disabled:opacity-40"
+                className="rounded-xl bg-emerald-600 px-6 py-2.5 text-sm font-bold text-white transition hover:bg-emerald-700 disabled:opacity-40"
               >
                 {busy ? "Importando…" : "Importar clientes"}
               </button>

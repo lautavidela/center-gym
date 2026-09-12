@@ -18,8 +18,8 @@ export async function GET(request: NextRequest) {
   const clients = await prisma.client.findMany({
     where: {
       OR: [
-        { name: { contains: query } },
-        { dni: { contains: query } },
+        { name: { contains: query, mode: "insensitive" } },
+        { dni: { contains: query, mode: "insensitive" } },
       ],
     },
     include: activeMembershipInclude,

@@ -83,7 +83,7 @@ export default async function VencimientosPage({
               href={`/admin/vencimientos?f=${t.f}`}
               className={`rounded-full px-4 py-1.5 text-sm font-medium ${
                 active
-                  ? "bg-red-600 text-white"
+                  ? "bg-emerald-600 text-white"
                   : "bg-white text-zinc-600 ring-1 ring-zinc-200 hover:bg-zinc-100"
               }`}
             >

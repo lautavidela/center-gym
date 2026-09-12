@@ -88,7 +88,7 @@ export default function PlanRow({ plan }: { plan: Plan }) {
                 name="name"
                 required
                 defaultValue={plan.name}
-                className="mt-1 w-full rounded-lg border border-zinc-300 px-3 py-2 outline-none focus:ring-2 focus:ring-red-500"
+                className="mt-1 w-full rounded-lg border border-zinc-300 px-3 py-2 outline-none focus:ring-2 focus:ring-emerald-500"
               />
             </label>
             <label className="block text-sm font-medium text-zinc-700">
@@ -99,7 +99,7 @@ export default function PlanRow({ plan }: { plan: Plan }) {
                 required
                 min="1"
                 defaultValue={plan.classesPerMonth}
-                className="mt-1 w-full rounded-lg border border-zinc-300 px-3 py-2 outline-none focus:ring-2 focus:ring-red-500"
+                className="mt-1 w-full rounded-lg border border-zinc-300 px-3 py-2 outline-none focus:ring-2 focus:ring-emerald-500"
               />
             </label>
             <label className="block text-sm font-medium text-zinc-700">
@@ -110,14 +110,14 @@ export default function PlanRow({ plan }: { plan: Plan }) {
                 min="0"
                 step="any"
                 defaultValue={plan.price}
-                className="mt-1 w-full rounded-lg border border-zinc-300 px-3 py-2 outline-none focus:ring-2 focus:ring-red-500"
+                className="mt-1 w-full rounded-lg border border-zinc-300 px-3 py-2 outline-none focus:ring-2 focus:ring-emerald-500"
               />
             </label>
             <div className="flex items-end">
               <button
                 type="submit"
                 disabled={isPending}
-                className="w-full rounded-lg bg-red-600 px-4 py-2 font-semibold text-white transition hover:bg-red-700 disabled:opacity-50"
+                className="w-full rounded-lg bg-emerald-600 px-4 py-2 font-semibold text-white transition hover:bg-emerald-700 disabled:opacity-50"
               >
                 {isPending ? "Guardando…" : "Guardar cambios"}
               </button>

@@ -21,9 +21,9 @@ export default async function ClientesPage({
     where: query
       ? {
           OR: [
-            { name: { contains: query } },
-            { dni: { contains: query } },
-            { phone: { contains: query } },
+            { name: { contains: query, mode: "insensitive" } },
+            { dni: { contains: query, mode: "insensitive" } },
+            { phone: { contains: query, mode: "insensitive" } },
           ],
         }
       : undefined,
@@ -49,7 +49,7 @@ export default async function ClientesPage({
         </div>
         <Link
           href="/admin/clientes/nuevo"
-          className="rounded-lg bg-red-600 px-4 py-2 font-semibold text-white transition hover:bg-red-700"
+          className="rounded-lg bg-emerald-600 px-4 py-2 font-semibold text-white transition hover:bg-emerald-700"
         >
           + Nuevo cliente
         </Link>
@@ -61,7 +61,7 @@ export default async function ClientesPage({
           name="q"
           defaultValue={query}
           placeholder="Buscar por nombre, DNI o teléfono…"
-          className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-2.5 outline-none focus:ring-2 focus:ring-red-500"
+          className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-2.5 outline-none focus:ring-2 focus:ring-emerald-500"
         />
       </form>
 

@@ -109,7 +109,7 @@ export default async function IngresosPage({
             type="month"
             name="m"
             defaultValue={month}
-            className="rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-red-500"
+            className="rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-emerald-500"
           />
         </form>
       </div>
@@ -174,7 +174,7 @@ export default async function IngresosPage({
                   </div>
                   <div className="mt-1.5 h-2 rounded-full bg-zinc-100">
                     <div
-                      className="h-2 rounded-full bg-red-600"
+                      className="h-2 rounded-full bg-emerald-600"
                       style={{
                         width: `${total > 0 ? (r.total / total) * 100 : 0}%`,
                       }}

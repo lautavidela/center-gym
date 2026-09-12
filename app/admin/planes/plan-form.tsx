@@ -28,7 +28,7 @@ export default function PlanForm() {
             name="name"
             required
             placeholder="Ej: Mensual 3 días…"
-            className="mt-1 w-full rounded-lg border border-zinc-300 px-3 py-2 outline-none focus:ring-2 focus:ring-red-500"
+            className="mt-1 w-full rounded-lg border border-zinc-300 px-3 py-2 outline-none focus:ring-2 focus:ring-emerald-500"
           />
         </label>
         <label className="block text-sm font-medium text-zinc-700">
@@ -39,7 +39,7 @@ export default function PlanForm() {
             required
             min="1"
             placeholder="12"
-            className="mt-1 w-full rounded-lg border border-zinc-300 px-3 py-2 outline-none focus:ring-2 focus:ring-red-500"
+            className="mt-1 w-full rounded-lg border border-zinc-300 px-3 py-2 outline-none focus:ring-2 focus:ring-emerald-500"
           />
         </label>
         <label className="block text-sm font-medium text-zinc-700">
@@ -50,14 +50,14 @@ export default function PlanForm() {
             min="0"
             step="any"
             placeholder="25000"
-            className="mt-1 w-full rounded-lg border border-zinc-300 px-3 py-2 outline-none focus:ring-2 focus:ring-red-500"
+            className="mt-1 w-full rounded-lg border border-zinc-300 px-3 py-2 outline-none focus:ring-2 focus:ring-emerald-500"
           />
         </label>
         <div className="flex items-end">
           <button
             type="submit"
             disabled={isPending}
-            className="w-full rounded-lg bg-red-600 px-4 py-2 font-semibold text-white transition hover:bg-red-700 disabled:opacity-50"
+            className="w-full rounded-lg bg-emerald-600 px-4 py-2 font-semibold text-white transition hover:bg-emerald-700 disabled:opacity-50"
           >
             {isPending ? "Guardando…" : "Crear plan"}
           </button>

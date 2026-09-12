@@ -3,7 +3,7 @@ import LoginForm from "./login-form";
 
 export const metadata: Metadata = {
   title: "Ingreso",
-  description: "Panel de administración del gimnasio.",
+  description: "Acceso al panel de gestión de MTGym.",
 };
 
 export default function LoginPage() {

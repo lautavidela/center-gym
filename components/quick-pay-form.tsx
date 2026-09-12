@@ -26,7 +26,7 @@ export default function QuickPayForm({
       <select
         name="planId"
         defaultValue={defaultPlanId ?? plans[0]?.id ?? ""}
-        className="rounded-lg border border-zinc-300 bg-white px-2.5 py-1.5 text-sm outline-none focus:ring-2 focus:ring-red-500"
+        className="rounded-lg border border-zinc-300 bg-white px-2.5 py-1.5 text-sm outline-none focus:ring-2 focus:ring-emerald-500"
       >
         {plans.map((p) => (
           <option key={p.id} value={p.id}>

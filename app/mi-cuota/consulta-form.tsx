@@ -30,12 +30,12 @@ export default function ConsultaForm() {
           inputMode="numeric"
           autoComplete="off"
           placeholder="Ingresá tu DNI"
-          className="min-w-0 flex-1 rounded-xl px-3 py-3 text-base outline-none focus:ring-2 focus:ring-red-500 sm:px-4 sm:text-lg"
+          className="min-w-0 flex-1 rounded-xl px-3 py-3 text-base outline-none focus:ring-2 focus:ring-emerald-500 sm:px-4 sm:text-lg"
         />
         <button
           type="submit"
           disabled={isPending}
-          className="shrink-0 rounded-xl bg-red-600 px-4 py-3 font-semibold text-white transition hover:bg-red-700 disabled:opacity-50 sm:px-6"
+          className="shrink-0 rounded-xl bg-emerald-600 px-4 py-3 font-semibold text-white transition hover:bg-emerald-700 disabled:opacity-50 sm:px-6"
         >
           {isPending ? "…" : "Buscar"}
         </button>
