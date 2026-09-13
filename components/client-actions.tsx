@@ -8,9 +8,11 @@ import {
 export default function ClientActions({
   clientId,
   isSuspended,
+  slug,
 }: {
   clientId: number;
   isSuspended: boolean;
+  slug: string;
 }) {
   return (
     <div className="flex flex-wrap items-center gap-2">
@@ -27,7 +29,7 @@ export default function ClientActions({
         </button>
       </form>
       <a
-        href={`/admin/clientes/${clientId}/editar`}
+        href={`/g/${slug}/admin/clientes/${clientId}/editar`}
         className="rounded-lg border border-zinc-200 px-3 py-1.5 text-sm font-medium text-zinc-600 hover:bg-zinc-100"
       >
         Editar

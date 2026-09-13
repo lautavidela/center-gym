@@ -18,7 +18,10 @@ export async function login(
     return { error: "Ingresá email y contraseña." };
   }
 
-  const user = await prisma.user.findUnique({ where: { email } });
+  const user = await prisma.user.findUnique({
+    where: { email },
+    include: { gym: true },
+  });
   if (!user || !verifyPassword(password, user.passwordHash)) {
     return { error: "Email o contraseña incorrectos." };
   }
@@ -28,7 +31,7 @@ export async function login(
   session.email = user.email;
   await session.save();
 
-  redirect("/admin");
+  redirect(user.gym ? `/g/${user.gym.slug}/admin` : "/admin");
 }
 
 export async function logout() {

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { activeMembershipInclude, type ClientWithMembership } from "@/lib/membership";
 import { daysUntil, formatDate, startOfDay } from "@/lib/dates";
+import { adminPath } from "@/lib/gyms";
 import StatusBadge from "@/components/status-badge";
 import QuickPayForm from "@/components/quick-pay-form";
 
@@ -24,18 +25,22 @@ type Row = {
 };
 
 export default async function VencimientosPage({
+  params,
   searchParams,
 }: {
+  params: Promise<{ slug: string }>;
   searchParams: Promise<{ f?: string }>;
 }) {
+  const { slug } = await params;
   const { f = "7" } = await searchParams;
   const today = startOfDay(new Date());
 
   const clients = await prisma.client.findMany({
+    where: { gym: { slug } },
     include: activeMembershipInclude,
   });
 
-  const plans = await prisma.plan.findMany({ where: { isActive: true } });
+  const plans = await prisma.plan.findMany({ where: { isActive: true, gym: { slug } } });
 
   const rows: Row[] = [];
   for (const client of clients) {
@@ -80,7 +85,7 @@ export default async function VencimientosPage({
           return (
             <Link
               key={t.f}
-              href={`/admin/vencimientos?f=${t.f}`}
+              href={adminPath(slug, `/vencimientos?f=${t.f}`)}
               className={`rounded-full px-4 py-1.5 text-sm font-medium ${
                 active
                   ? "bg-emerald-600 text-white"
@@ -124,7 +129,7 @@ export default async function VencimientosPage({
               >
                 <div className="min-w-0">
                   <Link
-                    href={`/admin/clientes/${r.client.id}`}
+                    href={adminPath(slug, `/clientes/${r.client.id}`)}
                     className="font-semibold hover:text-red-700"
                   >
                     {r.client.name}

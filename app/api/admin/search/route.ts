@@ -10,6 +10,10 @@ export async function GET(request: NextRequest) {
   if (!auth) {
     return NextResponse.json({ error: "No autorizado" }, { status: 401 });
   }
+  const gymId = auth.user.gymId;
+  if (!gymId) {
+    return NextResponse.json({ error: "El usuario no pertenece a un gimnasio" }, { status: 403 });
+  }
 
   const q = request.nextUrl.searchParams.get("q") ?? "";
   const query = q.trim();
@@ -17,6 +21,7 @@ export async function GET(request: NextRequest) {
 
   const clients = await prisma.client.findMany({
     where: {
+      gymId,
       OR: [
         { name: { contains: query, mode: "insensitive" } },
         { dni: { contains: query, mode: "insensitive" } },
@@ -28,7 +33,9 @@ export async function GET(request: NextRequest) {
   });
 
   const day = toDateKey(new Date());
-  const todayAttendance = await prisma.attendance.findMany({ where: { day } });
+  const todayAttendance = await prisma.attendance.findMany({
+    where: { day, gymId },
+  });
   const alreadyToday = new Set(todayAttendance.map((a) => a.clientId));
 
   return NextResponse.json({

@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
-import { requireAdmin } from "@/lib/auth";
+import { requireGymAdmin } from "@/lib/auth";
 import {
   addMonths,
   parseDni,
@@ -57,9 +57,9 @@ export async function importClients(
   rows: unknown[][],
   mapping: ImportMapping
 ): Promise<ImportResult> {
-  await requireAdmin();
+  const { gymId, gym } = await requireGymAdmin();
 
-  const plans = await prisma.plan.findMany();
+  const plans = await prisma.plan.findMany({ where: { gymId } });
   const planIndex = new Map<string, number>();
   for (const p of plans) {
     const key = normalize(p.name);
@@ -68,7 +68,7 @@ export async function importClients(
 
   const existingDnis = new Set<string>(
     (await prisma.client.findMany({
-      where: { dni: { not: null } },
+      where: { gymId, dni: { not: null } },
       select: { dni: true },
     }))
       .map((c) => c.dni as string)
@@ -136,7 +136,7 @@ export async function importClients(
     }
 
     const client = await prisma.client.create({
-      data: { dni, name, phone, email },
+      data: { gymId, dni, name, phone, email },
     });
 
     if (startDate && endDate) {
@@ -144,6 +144,7 @@ export async function importClients(
         data: {
           clientId: client.id,
           planId: planId,
+          gymId,
           startDate,
           endDate,
           isActive: true,
@@ -154,9 +155,10 @@ export async function importClients(
     imported++;
   }
 
-  revalidatePath("/admin");
-  revalidatePath("/admin/clientes");
-  revalidatePath("/admin/vencimientos");
+  const base = `/g/${gym.slug}/admin`;
+  revalidatePath(base);
+  revalidatePath(`${base}/clientes`);
+  revalidatePath(`${base}/vencimientos`);
 
   const errorCount = errors.length;
   return {

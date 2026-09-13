@@ -16,12 +16,12 @@ export const metadata: Metadata = {
 export default async function ClientePage({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  params: Promise<{ slug: string; id: string }>;
 }) {
-  const { id } = await params;
+  const { slug, id } = await params;
   const clientId = Number(id);
-  const client = await prisma.client.findUnique({
-    where: { id: clientId },
+  const client = await prisma.client.findFirst({
+    where: { id: clientId, gym: { slug } },
     include: {
       memberships: {
         orderBy: { endDate: "desc" },
@@ -40,7 +40,7 @@ export default async function ClientePage({
   });
   if (!client) notFound();
 
-  const plans = await prisma.plan.findMany({ where: { isActive: true } });
+  const plans = await prisma.plan.findMany({ where: { isActive: true, gym: { slug } } });
   const current = client.memberships.find((m) => m.isActive) ?? client.memberships[0];
   const status = computeStatus(current?.endDate, client.isSuspended);
   const daysLeft = current ? daysUntil(new Date(), current.endDate) : null;
@@ -66,7 +66,11 @@ export default async function ClientePage({
               </p>
             )}
           </div>
-          <ClientActions clientId={client.id} isSuspended={client.isSuspended} />
+          <ClientActions
+            clientId={client.id}
+            isSuspended={client.isSuspended}
+            slug={slug}
+          />
         </div>
 
         {current && (

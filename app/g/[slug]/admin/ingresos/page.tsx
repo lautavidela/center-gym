@@ -31,15 +31,19 @@ function monthName(month: string): string {
 }
 
 export default async function IngresosPage({
+  params,
   searchParams,
 }: {
+  params: Promise<{ slug: string }>;
   searchParams: Promise<{ m?: string }>;
 }) {
+  const { slug } = await params;
   const { m = "" } = await searchParams;
   const month = MONTH_RE.test(m) ? m : toDateKey(new Date()).slice(0, 7);
   const prevMonth = prevMonthKey(month);
 
   const payments = await prisma.payment.findMany({
+    where: { gym: { slug } },
     include: { client: true, plan: true },
     orderBy: { paidAt: "desc" },
   });
@@ -104,7 +108,7 @@ export default async function IngresosPage({
           <h1 className="text-xl font-black sm:text-2xl">Ingresos</h1>
           <p className="text-sm text-zinc-500">{monthName(month)}</p>
         </div>
-        <form action="/admin/ingresos" method="get">
+        <form action={`/g/${slug}/admin/ingresos`} method="get">
           <input
             type="month"
             name="m"

@@ -8,41 +8,67 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-model User {
-  id           Int      @id @default(autoincrement())
-  email        String   @unique
-  passwordHash String
-  createdAt    DateTime @default(now())
-}
-
-model Plan {
-  id             Int          @id @default(autoincrement())
-  name           String
-  classesPerMonth Int
-  price          Float        @default(0)
-  isActive       Boolean      @default(true)
-  createdAt      DateTime     @default(now())
-  memberships    Membership[]
-  payments       Payment[]
-}
-
-model Client {
-  id         Int           @id @default(autoincrement())
-  dni        String?       @unique
-  name       String
-  phone      String?
-  email      String?
-  notes      String?
-  isSuspended Boolean      @default(false)
-  createdAt  DateTime      @default(now())
+model Gym {
+  id          Int          @id @default(autoincrement())
+  slug        String       @unique
+  name        String
+  createdAt   DateTime     @default(now())
+  users       User[]
+  clients     Client[]
+  plans       Plan[]
   memberships Membership[]
   payments    Payment[]
   attendances Attendance[]
 }
 
+model User {
+  id           Int       @id @default(autoincrement())
+  email        String    @unique
+  passwordHash String
+  gymId        Int?
+  gym          Gym?      @relation(fields: [gymId], references: [id])
+  isSuperAdmin Boolean   @default(false)
+  createdAt    DateTime @default(now())
+}
+
+model Plan {
+  id              Int          @id @default(autoincrement())
+  gymId           Int
+  gym             Gym          @relation(fields: [gymId], references: [id])
+  name            String
+  classesPerMonth Int
+  price           Float        @default(0)
+  isActive        Boolean      @default(true)
+  createdAt       DateTime     @default(now())
+  memberships     Membership[]
+  payments        Payment[]
+
+  @@unique([gymId, name])
+}
+
+model Client {
+  id          Int           @id @default(autoincrement())
+  gymId       Int
+  gym         Gym           @relation(fields: [gymId], references: [id])
+  dni         String?
+  name        String
+  phone       String?
+  email       String?
+  notes       String?
+  isSuspended Boolean       @default(false)
+  createdAt   DateTime      @default(now())
+  memberships Membership[]
+  payments    Payment[]
+  attendances Attendance[]
+
+  @@unique([gymId, dni])
+}
+
 model Membership {
   id        Int      @id @default(autoincrement())
   clientId  Int
+  gymId     Int
+  gym       Gym      @relation(fields: [gymId], references: [id])
   planId    Int?
   startDate DateTime
   endDate   DateTime
@@ -57,6 +83,8 @@ model Payment {
   id           Int        @id @default(autoincrement())
   clientId     Int
   planId       Int
+  gymId        Int
+  gym          Gym        @relation(fields: [gymId], references: [id])
   membershipId Int?
   amount       Float
   method       String     @default("efectivo")
@@ -69,11 +97,13 @@ model Payment {
 }
 
 model Attendance {
-  id        Int      @id @default(autoincrement())
-  clientId  Int
-  day       String
-  dateTime  DateTime @default(now())
-  client    Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  id       Int      @id @default(autoincrement())
+  clientId Int
+  gymId    Int
+  gym      Gym      @relation(fields: [gymId], references: [id])
+  day      String
+  dateTime DateTime @default(now())
+  client   Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
 
   @@unique([clientId, day])
 }

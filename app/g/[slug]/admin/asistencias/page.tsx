@@ -9,16 +9,19 @@ export const metadata: Metadata = {
 };
 
 export default async function AsistenciasPage({
+  params,
   searchParams,
 }: {
+  params: Promise<{ slug: string }>;
   searchParams: Promise<{ d?: string }>;
 }) {
+  const { slug } = await params;
   const { d } = await searchParams;
   const day = d && /^\d{4}-\d{2}-\d{2}$/.test(d) ? d : toDateKey(new Date());
   const isToday = day === toDateKey(new Date());
 
   const attendances = await prisma.attendance.findMany({
-    where: { day },
+    where: { day, gym: { slug } },
     include: { client: true },
     orderBy: { dateTime: "desc" },
     take: isToday ? 100 : undefined,
@@ -44,7 +47,10 @@ export default async function AsistenciasPage({
                 {attendances.length === 1 ? "" : "s"}
               </p>
             </div>
-            <form action="/admin/asistencias" method="get">
+            <form
+              action={`/g/${slug}/admin/asistencias`}
+              method="get"
+            >
               <input
                 type="date"
                 name="d"

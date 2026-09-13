@@ -3,6 +3,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { computeStatus } from "@/lib/status";
 import { formatDate } from "@/lib/dates";
+import { adminPath } from "@/lib/gyms";
 import StatusBadge from "@/components/status-badge";
 
 export const metadata: Metadata = {
@@ -10,23 +11,29 @@ export const metadata: Metadata = {
 };
 
 export default async function ClientesPage({
+  params,
   searchParams,
 }: {
+  params: Promise<{ slug: string }>;
   searchParams: Promise<{ q?: string }>;
 }) {
+  const { slug } = await params;
   const { q = "" } = await searchParams;
   const query = q.trim();
 
   const clients = await prisma.client.findMany({
-    where: query
-      ? {
-          OR: [
-            { name: { contains: query, mode: "insensitive" } },
-            { dni: { contains: query, mode: "insensitive" } },
-            { phone: { contains: query, mode: "insensitive" } },
-          ],
-        }
-      : undefined,
+    where: {
+      gym: { slug },
+      ...(query
+        ? {
+            OR: [
+              { name: { contains: query, mode: "insensitive" } },
+              { dni: { contains: query, mode: "insensitive" } },
+              { phone: { contains: query, mode: "insensitive" } },
+            ],
+          }
+        : {}),
+    },
     include: {
       memberships: {
         where: { isActive: true },
@@ -48,14 +55,14 @@ export default async function ClientesPage({
           </p>
         </div>
         <Link
-          href="/admin/clientes/nuevo"
+          href={adminPath(slug, "/clientes/nuevo")}
           className="rounded-lg bg-emerald-600 px-4 py-2 font-semibold text-white transition hover:bg-emerald-700"
         >
           + Nuevo cliente
         </Link>
       </div>
 
-      <form action="/admin/clientes" method="get" className="mb-6">
+      <form action={adminPath(slug, "/clientes")} method="get" className="mb-6">
         <input
           type="text"
           name="q"
@@ -88,7 +95,7 @@ export default async function ClientesPage({
           return (
             <Link
               key={client.id}
-              href={`/admin/clientes/${client.id}`}
+              href={adminPath(slug, `/clientes/${client.id}`)}
               className="grid grid-cols-1 gap-3 border-b border-zinc-100 px-5 py-4 transition last:border-0 hover:bg-zinc-50 md:grid-cols-[1fr_auto_auto_auto] md:items-center"
             >
               <div className="min-w-0">

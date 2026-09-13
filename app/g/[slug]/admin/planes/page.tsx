@@ -7,8 +7,14 @@ export const metadata: Metadata = {
   title: "Planes",
 };
 
-export default async function PlanesPage() {
+export default async function PlanesPage({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = await params;
   const plans = await prisma.plan.findMany({
+    where: { gym: { slug } },
     orderBy: { createdAt: "asc" },
   });
 

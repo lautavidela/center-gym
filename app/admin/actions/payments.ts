@@ -1,8 +1,8 @@
-"use server";
+﻿"use server";
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
-import { requireAdmin } from "@/lib/auth";
+import { requireGymAdmin } from "@/lib/auth";
 import {
   computeMembershipDates,
   formatDate,
@@ -21,7 +21,7 @@ export async function registerPayment(
   _prev: PaymentFormState,
   formData: FormData
 ): Promise<PaymentFormState> {
-  await requireAdmin();
+  const { gymId, gym } = await requireGymAdmin();
 
   const planRaw = String(formData.get("planId") ?? "").trim();
   const planId = Number(planRaw);
@@ -32,11 +32,13 @@ export async function registerPayment(
 
   if (!Number.isInteger(planId)) return { error: "Seleccioná un plan." };
   const plan = await prisma.plan.findFirst({
-    where: { id: planId, isActive: true },
+    where: { id: planId, gymId: gymId, isActive: true },
   });
   if (!plan) return { error: "El plan seleccionado no existe o está inactivo." };
 
-  const client = await prisma.client.findUnique({ where: { id: clientId } });
+  const client = await prisma.client.findFirst({
+    where: { id: clientId, gymId: gymId },
+  });
   if (!client) return { error: "El cliente no existe." };
 
   let paidAt: Date;
@@ -53,7 +55,7 @@ export async function registerPayment(
     return { error: "El monto no es válido." };
 
   const current = await prisma.membership.findFirst({
-    where: { clientId, isActive: true },
+    where: { clientId, gymId: gymId, isActive: true },
     orderBy: { endDate: "desc" },
   });
 
@@ -63,12 +65,19 @@ export async function registerPayment(
   );
 
   await prisma.membership.updateMany({
-    where: { clientId, isActive: true },
+    where: { clientId, gymId: gymId, isActive: true },
     data: { isActive: false },
   });
 
   const membership = await prisma.membership.create({
-    data: { clientId, planId: plan.id, startDate, endDate, isActive: true },
+    data: {
+      clientId,
+      planId: plan.id,
+      gymId: gymId,
+      startDate,
+      endDate,
+      isActive: true,
+    },
   });
 
   await prisma.payment.create({
@@ -76,6 +85,7 @@ export async function registerPayment(
       clientId,
       planId: plan.id,
       membershipId: membership.id,
+      gymId: gymId,
       amount,
       method,
       paidAt,
@@ -83,9 +93,10 @@ export async function registerPayment(
     },
   });
 
-  revalidatePath("/admin");
-  revalidatePath("/admin/vencimientos");
-  revalidatePath("/admin/clientes");
-  revalidatePath(`/admin/clientes/${clientId}`);
+  const base = `/g/${gym.slug}/admin`;
+  revalidatePath(base);
+  revalidatePath(`${base}/vencimientos`);
+  revalidatePath(`${base}/clientes`);
+  revalidatePath(`${base}/clientes/${clientId}`);
   return { success: true, endDate: formatDate(endDate) };
 }

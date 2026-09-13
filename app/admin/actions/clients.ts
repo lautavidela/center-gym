@@ -3,13 +3,19 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
-import { requireAdmin } from "@/lib/auth";
+import { requireGymAdmin } from "@/lib/auth";
 import { addMonths, parseDni, parseExcelDate, startOfDay } from "@/lib/dates";
 
 export type ClientFormState = { error?: string };
 
-async function makeMembership(clientId: number, planId: number) {
-  const plan = await prisma.plan.findUnique({ where: { id: planId } });
+async function makeMembership(
+  clientId: number,
+  planId: number,
+  gymId: number
+) {
+  const plan = await prisma.plan.findFirst({
+    where: { id: planId, gymId },
+  });
   if (!plan) return;
 
   const today = startOfDay(new Date());
@@ -19,6 +25,7 @@ async function makeMembership(clientId: number, planId: number) {
     data: {
       clientId,
       planId: plan.id,
+      gymId,
       startDate: today,
       endDate,
       isActive: true,
@@ -30,6 +37,7 @@ async function makeMembership(clientId: number, planId: number) {
       clientId,
       planId: plan.id,
       membershipId: membership.id,
+      gymId,
       amount: plan.price,
       method: "efectivo",
       paidAt: today,
@@ -42,7 +50,7 @@ export async function createClient(
   _prev: ClientFormState,
   formData: FormData
 ): Promise<ClientFormState> {
-  await requireAdmin();
+  const { gymId, gym } = await requireGymAdmin();
 
   const dni = parseDni(formData.get("dni"));
   const name = String(formData.get("name") ?? "").trim();
@@ -56,20 +64,25 @@ export async function createClient(
   if (dni.length < 6 || dni.length > 11)
     return { error: "El DNI no parece válido." };
 
-  const existing = await prisma.client.findUnique({ where: { dni } });
+  const existing = await prisma.client.findFirst({
+    where: { gymId, dni },
+  });
   if (existing) return { error: `Ya existe un socio con DNI ${dni}.` };
 
   const client = await prisma.client.create({
-    data: { dni, name, phone, email, notes },
+    data: { gymId, dni, name, phone, email, notes },
   });
 
   const planId = planRaw ? Number(planRaw) : null;
   if (planId && !Number.isNaN(planId)) {
-    await makeMembership(client.id, planId);
+    const plan = await prisma.plan.findFirst({
+      where: { id: planId, gymId },
+    });
+    if (plan) await makeMembership(client.id, plan.id, gymId);
   }
 
-  revalidatePath("/admin/clientes");
-  redirect(`/admin/clientes/${client.id}`);
+  revalidatePath(`/g/${gym.slug}/admin/clientes`);
+  redirect(`/g/${gym.slug}/admin/clientes/${client.id}`);
 }
 
 export async function updateClient(
@@ -77,7 +90,7 @@ export async function updateClient(
   _prev: ClientFormState,
   formData: FormData
 ): Promise<ClientFormState> {
-  await requireAdmin();
+  const { gymId, gym } = await requireGymAdmin();
 
   const dni = parseDni(formData.get("dni"));
   const name = String(formData.get("name") ?? "").trim();
@@ -88,9 +101,14 @@ export async function updateClient(
   if (!name) return { error: "El nombre es obligatorio." };
   if (!dni) return { error: "El DNI es obligatorio." };
 
+  const owned = await prisma.client.findFirst({
+    where: { id, gymId },
+  });
+  if (!owned) return { error: "El cliente no existe en tu gimnasio." };
+
   if (dni) {
     const existing = await prisma.client.findFirst({
-      where: { dni, NOT: { id } },
+      where: { gymId, dni, NOT: { id } },
     });
     if (existing)
       return { error: `Ya existe otro socio con DNI ${dni}.` };
@@ -100,26 +118,28 @@ export async function updateClient(
     where: { id },
     data: { dni, name, phone, email, notes },
   });
-  revalidatePath("/admin/clientes");
-  revalidatePath(`/admin/clientes/${id}`);
+  revalidatePath(`/g/${gym.slug}/admin/clientes`);
+  revalidatePath(`/g/${gym.slug}/admin/clientes/${id}`);
   return {};
 }
 
 export async function setClientSuspended(id: number, suspended: boolean) {
-  await requireAdmin();
+  const { gymId, gym } = await requireGymAdmin();
+  const owned = await prisma.client.findFirst({ where: { id, gymId } });
+  if (!owned) return;
   await prisma.client.update({
     where: { id },
     data: { isSuspended: suspended },
   });
-  revalidatePath("/admin/clientes");
-  revalidatePath(`/admin/clientes/${id}`);
+  revalidatePath(`/g/${gym.slug}/admin/clientes`);
+  revalidatePath(`/g/${gym.slug}/admin/clientes/${id}`);
 }
 
 export async function deleteClient(id: number) {
-  await requireAdmin();
-  await prisma.client.delete({ where: { id } });
-  revalidatePath("/admin/clientes");
-  redirect("/admin/clientes");
+  const { gymId, gym } = await requireGymAdmin();
+  await prisma.client.deleteMany({ where: { id, gymId } });
+  revalidatePath(`/g/${gym.slug}/admin/clientes`);
+  redirect(`/g/${gym.slug}/admin/clientes`);
 }
 
 export async function addManualMembership(
@@ -127,13 +147,20 @@ export async function addManualMembership(
   _prev: ClientFormState,
   formData: FormData
 ): Promise<ClientFormState> {
-  await requireAdmin();
+  const { gymId, gym } = await requireGymAdmin();
+
+  const owned = await prisma.client.findFirst({
+    where: { id: clientId, gymId },
+  });
+  if (!owned) return { error: "El cliente no existe en tu gimnasio." };
 
   const planId = Number(formData.get("planId"));
   const startRaw = String(formData.get("startDate") ?? "").trim();
   const endRaw = String(formData.get("endDate") ?? "").trim();
 
-  const plan = await prisma.plan.findUnique({ where: { id: planId } });
+  const plan = await prisma.plan.findFirst({
+    where: { id: planId, gymId },
+  });
   if (!plan) return { error: "Seleccioná un plan válido." };
 
   const startDate =
@@ -151,10 +178,17 @@ export async function addManualMembership(
     data: { isActive: false },
   });
   await prisma.membership.create({
-    data: { clientId, planId: plan.id, startDate, endDate, isActive: true },
+    data: {
+      clientId,
+      planId: plan.id,
+      gymId,
+      startDate,
+      endDate,
+      isActive: true,
+    },
   });
 
-  revalidatePath("/admin/clientes");
-  revalidatePath(`/admin/clientes/${clientId}`);
+  revalidatePath(`/g/${gym.slug}/admin/clientes`);
+  revalidatePath(`/g/${gym.slug}/admin/clientes/${clientId}`);
   return {};
 }

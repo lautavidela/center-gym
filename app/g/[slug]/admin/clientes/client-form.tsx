@@ -13,6 +13,7 @@ type Props = {
   ) => Promise<ClientFormState>;
   plans: Plan[];
   submitLabel: string;
+  slug: string;
   defaults?: {
     dni?: string;
     name?: string;
@@ -26,6 +27,7 @@ export default function ClientForm({
   action,
   plans,
   submitLabel,
+  slug,
   defaults,
 }: Props) {
   const [state, formAction, isPending] = useActionState<ClientFormState, FormData>(
@@ -118,7 +120,7 @@ export default function ClientForm({
 
       <div className="mt-6 flex items-center justify-end gap-3">
         <Link
-          href="/admin/clientes"
+          href={`/g/${slug}/admin/clientes`}
           className="rounded-lg border border-zinc-200 px-4 py-2 text-sm font-medium text-zinc-600 hover:bg-zinc-100"
         >
           Cancelar

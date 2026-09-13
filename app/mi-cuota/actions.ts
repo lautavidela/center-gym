@@ -1,34 +1,25 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import { daysUntil, formatDate, startOfDay } from "@/lib/dates";
-import { formatClassesLabel } from "@/lib/plans";
+import {
+  activeMembershipsArgs,
+  buildConsultaView,
+  recentPaymentsArgs,
+  type ConsultaView,
+} from "@/lib/consulta";
 
-export type ConsultaResult = {
-  ok: boolean;
-  message?: string;
-  client?: {
-    name: string;
-    phone: string | null;
-    plan: string | null;
-    planDetail: string | null;
-    startDate: string;
-    endDate: string;
-    status: "al-dia" | "vence-hoy" | "vencido";
-    daysLeft: number;
-    payments: {
-      date: string;
-      plan: string;
-      amount: number;
-      method: string;
-    }[];
-  };
-};
+export type ConsultaGlobalResult =
+  | { ok: false; message: string }
+  | {
+      ok: true;
+      multiple: boolean;
+      results: ConsultaView[];
+    };
 
-export async function consultarSocio(
-  _prev: ConsultaResult | null,
+export async function consultarSocioGlobal(
+  _prev: ConsultaGlobalResult | null,
   formData: FormData
-): Promise<ConsultaResult> {
+): Promise<ConsultaGlobalResult> {
   const rawDni = String(formData.get("dni") ?? "").trim();
   const dni = rawDni.replace(/\D/g, "");
 
@@ -36,62 +27,27 @@ export async function consultarSocio(
     return { ok: false, message: "Ingresá tu DNI para consultar." };
   }
 
-  const client = await prisma.client.findUnique({
+  const clients = await prisma.client.findMany({
     where: { dni },
     include: {
-      memberships: {
-        where: { isActive: true },
-        orderBy: { endDate: "desc" },
-        take: 1,
-        include: { plan: true },
-      },
-      payments: {
-        orderBy: { paidAt: "desc" },
-        take: 5,
-        include: { plan: true },
-      },
+      gym: true,
+      memberships: activeMembershipsArgs,
+      payments: recentPaymentsArgs,
     },
   });
 
-  if (!client) {
+  if (clients.length === 0) {
     return {
       ok: false,
-      message: "No encontramos un socio con ese DNI.",
+      message: "No encontramos un socio con ese DNI en ningún gimnasio.",
     };
   }
 
-  const membership = client.memberships[0];
-  if (!membership) {
-    return {
-      ok: false,
-      message: `${client.name}: todavía no tiene una membresía cargada. Consultá con la administración.`,
-    };
-  }
-
-  const today = startOfDay(new Date());
-  const daysLeft = daysUntil(today, membership.endDate);
-  const status: "al-dia" | "vence-hoy" | "vencido" =
-    daysLeft > 0 ? "al-dia" : daysLeft === 0 ? "vence-hoy" : "vencido";
+  const results = clients.map(buildConsultaView);
 
   return {
     ok: true,
-    client: {
-      name: client.name,
-      phone: client.phone,
-      plan: membership.plan?.name ?? null,
-      planDetail: membership.plan
-        ? formatClassesLabel(membership.plan.classesPerMonth)
-        : null,
-      startDate: formatDate(membership.startDate),
-      endDate: formatDate(membership.endDate),
-      status,
-      daysLeft,
-      payments: client.payments.map((p) => ({
-        date: formatDate(p.paidAt),
-        plan: p.plan?.name ?? "—",
-        amount: p.amount,
-        method: p.method,
-      })),
-    },
+    multiple: results.length > 1,
+    results,
   };
 }

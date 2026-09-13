@@ -5,29 +5,32 @@ import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 
 const navItems = [
-  { href: "/admin", label: "Inicio", icon: "▦", exact: true },
-  { href: "/admin/clientes", label: "Clientes", icon: "👥" },
-  { href: "/admin/asistencias", label: "Asistencias", icon: "✓" },
-  { href: "/admin/vencimientos", label: "Vencimientos", icon: "⏰" },
-  { href: "/admin/ingresos", label: "Ingresos", icon: "📈" },
-  { href: "/admin/planes", label: "Planes", icon: "🏋" },
-  { href: "/admin/migracion", label: "Migración", icon: "⇅" },
+  { sub: "", label: "Inicio", icon: "▦", exact: true },
+  { sub: "/clientes", label: "Clientes", icon: "👥" },
+  { sub: "/asistencias", label: "Asistencias", icon: "✓" },
+  { sub: "/vencimientos", label: "Vencimientos", icon: "⏰" },
+  { sub: "/ingresos", label: "Ingresos", icon: "📈" },
+  { sub: "/planes", label: "Planes", icon: "🏋" },
+  { sub: "/migracion", label: "Migración", icon: "⇅" },
 ];
 
-export default function AdminNav() {
+export default function AdminNav({ slug }: { slug: string }) {
   const pathname = usePathname();
+  const base = `/g/${slug}/admin`;
   const itemRefs = useRef(new Map<string, HTMLAnchorElement>());
   const [indicator, setIndicator] = useState({ left: 0, width: 0 });
 
-  const activeHref = navItems.find((item) =>
-    item.exact
-      ? pathname === item.href
-      : pathname === item.href || pathname.startsWith(item.href + "/")
-  )?.href;
+  const activeSub = navItems.find((item) => {
+    const href = base + item.sub;
+    return item.exact
+      ? pathname === href
+      : pathname === href || pathname.startsWith(href + "/");
+  })?.sub;
 
   useEffect(() => {
     const update = () => {
-      const el = activeHref ? itemRefs.current.get(activeHref) : undefined;
+      const key = activeSub ?? "";
+      const el = itemRefs.current.get(key);
       if (el) {
         setIndicator({ left: el.offsetLeft, width: el.offsetWidth });
       }
@@ -35,21 +38,22 @@ export default function AdminNav() {
     update();
     window.addEventListener("resize", update);
     return () => window.removeEventListener("resize", update);
-  }, [activeHref, pathname]);
+  }, [activeSub, pathname]);
 
   return (
     <nav className="overflow-x-auto">
       <div className="relative mx-auto flex w-max gap-1 px-4 pb-3">
         {navItems.map((item) => {
-          const active = item.href === activeHref;
+          const href = base + item.sub;
+          const active = item.sub === activeSub;
           return (
             <Link
-              key={item.href}
+              key={item.sub}
               ref={(el) => {
-                if (el) itemRefs.current.set(item.href, el);
-                else itemRefs.current.delete(item.href);
+                if (el) itemRefs.current.set(item.sub, el);
+                else itemRefs.current.delete(item.sub);
               }}
-              href={item.href}
+              href={href}
               aria-current={active ? "page" : undefined}
               className={`flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-md px-3 py-2 text-sm font-medium transition-colors ${
                 active

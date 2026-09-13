@@ -1,8 +1,8 @@
-"use server";
+﻿"use server";
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
-import { requireAdmin } from "@/lib/auth";
+import { requireGymAdmin } from "@/lib/auth";
 
 export type PlanFormState = { error?: string };
 
@@ -10,7 +10,7 @@ export async function createPlan(
   _prev: PlanFormState,
   formData: FormData
 ): Promise<PlanFormState> {
-  await requireAdmin();
+  const { gymId, gym } = await requireGymAdmin();
   const name = String(formData.get("name") ?? "").trim();
   const classesPerMonth = Number(formData.get("classesPerMonth"));
   const price = Number(formData.get("price")) || 0;
@@ -21,9 +21,9 @@ export async function createPlan(
   if (price < 0) return { error: "El precio no puede ser negativo." };
 
   await prisma.plan.create({
-    data: { name, classesPerMonth, price },
+    data: { gymId: gymId, name, classesPerMonth, price },
   });
-  revalidatePath("/admin/planes");
+  revalidatePath(`/g/${gym.slug}/admin/planes`);
   return {};
 }
 
@@ -32,7 +32,7 @@ export async function updatePlan(
   _prev: PlanFormState,
   formData: FormData
 ): Promise<PlanFormState> {
-  await requireAdmin();
+  const { gymId, gym } = await requireGymAdmin();
   const name = String(formData.get("name") ?? "").trim();
   const classesPerMonth = Number(formData.get("classesPerMonth"));
   const price = Number(formData.get("price")) || 0;
@@ -42,36 +42,41 @@ export async function updatePlan(
     return { error: "Las clases por mes deben ser un número mayor a 0." };
   if (price < 0) return { error: "El precio no puede ser negativo." };
 
+  const owned = await prisma.plan.findFirst({ where: { id, gymId: gymId } });
+  if (!owned) return { error: "El plan no existe en tu gimnasio." };
+
   await prisma.plan.update({
     where: { id },
     data: { name, classesPerMonth, price },
   });
-  revalidatePath("/admin/planes");
+  revalidatePath(`/g/${gym.slug}/admin/planes`);
   return {};
 }
 
 export async function togglePlanActive(id: number) {
-  await requireAdmin();
-  const plan = await prisma.plan.findUnique({ where: { id } });
+  const { gymId, gym } = await requireGymAdmin();
+  const plan = await prisma.plan.findFirst({
+    where: { id, gymId: gymId },
+  });
   if (!plan) return;
   await prisma.plan.update({
     where: { id },
     data: { isActive: !plan.isActive },
   });
-  revalidatePath("/admin/planes");
+  revalidatePath(`/g/${gym.slug}/admin/planes`);
 }
 
 export async function deletePlan(id: number) {
-  await requireAdmin();
-  const used = await prisma.payment.count({ where: { planId: id } });
+  const { gymId, gym } = await requireGymAdmin();
+  const used = await prisma.payment.count({ where: { planId: id, gymId: gymId } });
   if (used > 0) {
     await prisma.plan.update({ where: { id }, data: { isActive: false } });
   } else {
-    await prisma.plan.deleteMany({ where: { id } });
+    await prisma.plan.deleteMany({ where: { id, gymId: gymId } });
     await prisma.membership.updateMany({
       where: { planId: id },
       data: { planId: null },
     });
   }
-  revalidatePath("/admin/planes");
+  revalidatePath(`/g/${gym.slug}/admin/planes`);
 }

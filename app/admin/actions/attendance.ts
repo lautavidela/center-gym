@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
-import { requireAdmin } from "@/lib/auth";
+import { requireGymAdmin } from "@/lib/auth";
 import { toDateKey } from "@/lib/dates";
 
 export type AttendanceFormState = {
@@ -16,29 +16,33 @@ export async function registerAttendance(
   _prev: AttendanceFormState,
   _formData: FormData
 ): Promise<AttendanceFormState> {
-  await requireAdmin();
+  const { gymId, gym } = await requireGymAdmin();
 
-  const client = await prisma.client.findUnique({ where: { id: clientId } });
+  const client = await prisma.client.findFirst({
+    where: { id: clientId, gymId },
+  });
   if (!client) return { error: "El cliente no existe." };
 
   const day = toDateKey(new Date());
-  const existing = await prisma.attendance.findUnique({
-    where: { clientId_day: { clientId, day } },
+  const existing = await prisma.attendance.findFirst({
+    where: { clientId, day, gymId },
   });
   if (existing)
     return { error: `${client.name} ya registró asistencia hoy.` };
 
   await prisma.attendance.create({
-    data: { clientId, day, dateTime: new Date() },
+    data: { clientId, gymId, day, dateTime: new Date() },
   });
 
-  revalidatePath("/admin");
-  revalidatePath("/admin/asistencias");
+  const base = `/g/${gym.slug}/admin`;
+  revalidatePath(base);
+  revalidatePath(`${base}/asistencias`);
   return { success: true, clientName: client.name };
 }
 
 export async function removeAttendance(id: number) {
-  await requireAdmin();
-  await prisma.attendance.delete({ where: { id } });
-  revalidatePath("/admin/asistencias");
+  const { gymId, gym } = await requireGymAdmin();
+  await prisma.attendance.deleteMany({ where: { id, gymId } });
+  const base = `/g/${gym.slug}/admin`;
+  revalidatePath(`${base}/asistencias`);
 }

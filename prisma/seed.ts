@@ -7,11 +7,34 @@ const prisma = new PrismaClient();
 async function main() {
   const adminEmail = process.env.ADMIN_EMAIL || "admin@centergym.com";
   const adminPassword = process.env.ADMIN_PASSWORD || "admin123";
+  const gymSlug = process.env.DEFAULT_GYM_SLUG || "center-gym";
+
+  const gym = await prisma.gym.upsert({
+    where: { slug: gymSlug },
+    update: { name: "Center Gym" },
+    create: { slug: gymSlug, name: "Center Gym" },
+  });
 
   await prisma.user.upsert({
     where: { email: adminEmail },
-    update: {},
-    create: { email: adminEmail, passwordHash: hashPassword(adminPassword) },
+    update: { gymId: gym.id, isSuperAdmin: false },
+    create: {
+      email: adminEmail,
+      passwordHash: hashPassword(adminPassword),
+      gymId: gym.id,
+      isSuperAdmin: false,
+    },
+  });
+
+  await prisma.user.upsert({
+    where: { email: "lautaro@admin.com" },
+    update: { isSuperAdmin: true, gymId: null },
+    create: {
+      email: "lautaro@admin.com",
+      passwordHash: hashPassword(process.env.LAUTARO_PASSWORD || "admin123"),
+      isSuperAdmin: true,
+      gymId: null,
+    },
   });
 
   const planData = [
@@ -23,7 +46,9 @@ async function main() {
 
   const plans: Record<string, number> = {};
   for (const p of planData) {
-    const existing = await prisma.plan.findFirst({ where: { name: p.name } });
+    const existing = await prisma.plan.findFirst({
+      where: { gymId: gym.id, name: p.name },
+    });
     let plan = existing;
     if (plan) {
       plan = await prisma.plan.update({
@@ -31,13 +56,15 @@ async function main() {
         data: { classesPerMonth: p.classesPerMonth, price: p.price },
       });
     } else {
-      plan = await prisma.plan.create({ data: p });
+      plan = await prisma.plan.create({
+        data: { gymId: gym.id, ...p },
+      });
     }
     plans[p.name] = plan.id;
   }
 
   const stale = await prisma.plan.deleteMany({
-    where: { name: { notIn: planNames } },
+    where: { gymId: gym.id, name: { notIn: planNames } },
   });
   if (stale.count > 0) {
     console.log(`Planes viejos eliminados: ${stale.count}`);
@@ -63,11 +90,14 @@ async function main() {
   ];
 
   for (const c of sampleClients) {
-    const existing = await prisma.client.findUnique({ where: { dni: c.dni } });
+    const existing = await prisma.client.findFirst({
+      where: { gymId: gym.id, dni: c.dni },
+    });
     if (existing) continue;
 
     const client = await prisma.client.create({
       data: {
+        gymId: gym.id,
         dni: c.dni,
         name: c.name,
         phone: c.phone,
@@ -92,6 +122,7 @@ async function main() {
     const membership = await prisma.membership.create({
       data: {
         clientId: client.id,
+        gymId: gym.id,
         planId: plan.id,
         startDate,
         endDate,
@@ -103,6 +134,7 @@ async function main() {
       data: {
         clientId: client.id,
         planId: plan.id,
+        gymId: gym.id,
         membershipId: membership.id,
         amount: plan.price,
         method: "efectivo",
@@ -113,7 +145,12 @@ async function main() {
 
     if (c.offset > -7) {
       await prisma.attendance.create({
-        data: { clientId: client.id, day: toDateKey(now), dateTime: now },
+        data: {
+          clientId: client.id,
+          gymId: gym.id,
+          day: toDateKey(now),
+          dateTime: now,
+        },
       }).catch(() => undefined);
     }
   }
