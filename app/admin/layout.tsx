@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/auth";
 import { logout } from "@/app/login/actions";
+import Brand from "@/components/brand";
 
 export default async function SuperAdminLayout({
   children,
@@ -19,12 +20,15 @@ export default async function SuperAdminLayout({
     <div className="flex min-h-screen flex-col bg-zinc-50">
       <header className="sticky top-0 z-10 border-b border-zinc-200 bg-white">
         <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-3">
-          <p className="text-xl font-black tracking-tight">
-            <span className="text-emerald-600">MT</span>Gym
-            <span className="ml-2 rounded-full bg-zinc-100 px-2 py-0.5 align-middle text-xs font-bold text-zinc-600">
-              superadmin
-            </span>
-          </p>
+          <div className="flex items-center gap-2">
+            <Brand />
+            <p className="text-xl font-black tracking-tight">
+              <span className="text-emerald-600">MT</span>Gym
+              <span className="ml-2 rounded-full bg-zinc-100 px-2 py-0.5 align-middle text-xs font-bold text-zinc-600">
+                superadmin
+              </span>
+            </p>
+          </div>
           <form action={logout}>
             <button
               type="submit"

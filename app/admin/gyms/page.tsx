@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import GymsForm from "./gyms-form";
+import GymDeleteButton from "./gym-delete-button";
 
 export const metadata = {
   title: "Gyms · Superadmin",
@@ -55,12 +56,15 @@ export default async function GymsPage() {
                     {g.users.map((u) => u.email).join(", ") || "sin usuarios"}
                   </p>
                 </div>
-                <Link
-                  href={`/g/${g.slug}/mi-cuota`}
-                  className="shrink-0 rounded-lg border border-zinc-200 px-3 py-1.5 text-sm font-medium text-zinc-600 hover:bg-zinc-100"
-                >
-                  Ver consulta pública →
-                </Link>
+                <div className="flex shrink-0 flex-wrap items-center gap-2">
+                  <GymDeleteButton gymId={g.id} gymName={g.name} />
+                  <Link
+                    href={`/g/${g.slug}/mi-cuota`}
+                    className="shrink-0 rounded-lg border border-zinc-200 px-3 py-1.5 text-sm font-medium text-zinc-600 hover:bg-zinc-100"
+                  >
+                    Ver consulta pública →
+                  </Link>
+                </div>
               </li>
             ))}
           </ul>

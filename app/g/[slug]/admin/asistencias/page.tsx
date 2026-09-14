@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
-import { formatDate, toDateKey } from "@/lib/dates";
+import { formatDate, formatTime, toDateKey } from "@/lib/dates";
 import AttendanceRegister from "@/components/attendance-register";
 import RemoveAttendanceButton from "@/components/remove-attendance";
 
@@ -66,33 +66,30 @@ export default async function AsistenciasPage({
             </p>
           ) : (
             <ul className="divide-y divide-zinc-100">
-              {attendances.map((a) => {
-                const time = new Date(a.dateTime);
-                const h = String(time.getHours()).padStart(2, "0");
-                const min = String(time.getMinutes()).padStart(2, "0");
-                return (
-                  <li
-                    key={a.id}
-                    className="flex items-center justify-between gap-3 px-5 py-2.5"
-                  >
-                    <div className="flex items-center gap-3">
-                      <span className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-100 text-emerald-700">
-                        ✓
-                      </span>
-                      <div>
-                        <p className="font-medium">{a.client.name}</p>
-                        <p className="text-xs text-zinc-500">
-                          {a.client.dni ? `DNI ${a.client.dni}` : "Sin DNI"}
-                        </p>
-                      </div>
+              {attendances.map((a) => (
+                <li
+                  key={a.id}
+                  className="flex items-center justify-between gap-3 px-5 py-2.5"
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-100 text-emerald-700">
+                      ✓
+                    </span>
+                    <div>
+                      <p className="font-medium">{a.client.name}</p>
+                      <p className="text-xs text-zinc-500">
+                        {a.client.dni ? `DNI ${a.client.dni}` : "Sin DNI"}
+                      </p>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <span className="font-semibold tabular-nums">{h}:{min}</span>
-                      <RemoveAttendanceButton id={a.id} />
-                    </div>
-                  </li>
-                );
-              })}
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="font-semibold tabular-nums">
+                      {formatTime(a.dateTime)}
+                    </span>
+                    <RemoveAttendanceButton id={a.id} />
+                  </div>
+                </li>
+              ))}
             </ul>
           )}
         </section>

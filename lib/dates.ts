@@ -1,5 +1,43 @@
+const BUENOS_AIRES_TZ = "America/Argentina/Buenos_Aires";
+
+function partsInTz(d: Date, tz: string) {
+  const fmt = new Intl.DateTimeFormat("en-CA", {
+    timeZone: tz,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  });
+  const parts: Record<string, string> = {};
+  for (const p of fmt.formatToParts(d)) parts[p.type] = p.value;
+  return {
+    year: Number(parts.year),
+    month: Number(parts.month),
+    day: Number(parts.day),
+    hour: Number(parts.hour),
+    minute: Number(parts.minute),
+    second: Number(parts.second),
+  };
+}
+
+function tzOffsetMs(d: Date, tz: string): number {
+  const p = partsInTz(d, tz);
+  const asUtc = Date.UTC(p.year, p.month - 1, p.day, p.hour, p.minute, p.second);
+  return asUtc - d.getTime();
+}
+
+function startOfDayInTz(d: Date, tz: string): Date {
+  const p = partsInTz(d, tz);
+  const asUtcMidnight = Date.UTC(p.year, p.month - 1, p.day);
+  const offset = tzOffsetMs(new Date(asUtcMidnight), tz);
+  return new Date(asUtcMidnight - offset);
+}
+
 export function startOfDay(d: Date = new Date()): Date {
-  return new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0, 0);
+  return startOfDayInTz(d, BUENOS_AIRES_TZ);
 }
 
 export function normalizeDay(y: number, m: number, day: number): Date {
@@ -19,10 +57,10 @@ export function addMonths(d: Date, months: number): Date {
 }
 
 export function toDateKey(d: Date): string {
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${y}-${m}-${day}`;
+  const p = partsInTz(d, BUENOS_AIRES_TZ);
+  const m = String(p.month).padStart(2, "0");
+  const day = String(p.day).padStart(2, "0");
+  return `${p.year}-${m}-${day}`;
 }
 
 export function todayKey(): string {
@@ -33,27 +71,32 @@ export function formatDate(d: Date | string | null | undefined): string {
   if (!d) return "—";
   const date = typeof d === "string" ? new Date(d) : d;
   if (Number.isNaN(date.getTime())) return "—";
-  const day = String(date.getDate()).padStart(2, "0");
-  const m = String(date.getMonth() + 1).padStart(2, "0");
-  return `${day}/${m}/${date.getFullYear()}`;
+  const p = partsInTz(date, BUENOS_AIRES_TZ);
+  const day = String(p.day).padStart(2, "0");
+  const m = String(p.month).padStart(2, "0");
+  return `${day}/${m}/${p.year}`;
 }
 
 export function formatTime(d: Date | string | null | undefined): string {
   if (!d) return "—";
   const date = typeof d === "string" ? new Date(d) : d;
-  const h = String(date.getHours()).padStart(2, "0");
-  const min = String(date.getMinutes()).padStart(2, "0");
+  if (Number.isNaN(date.getTime())) return "—";
+  const p = partsInTz(date, BUENOS_AIRES_TZ);
+  const h = String(p.hour).padStart(2, "0");
+  const min = String(p.minute).padStart(2, "0");
   return `${h}:${min}`;
 }
 
 export function formatDateTime(d: Date | string | null | undefined): string {
   if (!d) return "—";
   const date = typeof d === "string" ? new Date(d) : d;
-  const day = String(date.getDate()).padStart(2, "0");
-  const m = String(date.getMonth() + 1).padStart(2, "0");
-  const h = String(date.getHours()).padStart(2, "0");
-  const min = String(date.getMinutes()).padStart(2, "0");
-  return `${day}/${m}/${date.getFullYear()} ${h}:${min}`;
+  if (Number.isNaN(date.getTime())) return "—";
+  const p = partsInTz(date, BUENOS_AIRES_TZ);
+  const day = String(p.day).padStart(2, "0");
+  const m = String(p.month).padStart(2, "0");
+  const h = String(p.hour).padStart(2, "0");
+  const min = String(p.minute).padStart(2, "0");
+  return `${day}/${m}/${p.year} ${h}:${min}`;
 }
 
 export function daysUntil(from: Date, to: Date): number {

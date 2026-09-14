@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/auth";
 import { logout } from "@/app/login/actions";
 import AdminNav from "@/components/admin-nav";
+import Brand from "@/components/brand";
 
 export default async function AdminLayout({
   children,
@@ -25,9 +26,12 @@ export default async function AdminLayout({
     <div className="flex min-h-screen flex-col bg-zinc-50">
       <header className="sticky top-0 z-10 border-b border-zinc-200 bg-white">
         <div className="flex items-center justify-between px-4 py-3">
-          <p className="text-xl font-black tracking-tight">
-            <span className="text-emerald-600">MT</span>Gym
-          </p>
+          <div className="flex items-center gap-2">
+            <Brand />
+            <p className="text-xl font-black tracking-tight">
+              <span className="text-emerald-600">MT</span>Gym
+            </p>
+          </div>
           <form action={logout}>
             <button
               type="submit"

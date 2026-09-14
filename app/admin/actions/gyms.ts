@@ -11,6 +11,11 @@ export type CreateGymState = {
   email?: string;
 };
 
+export type DeleteGymState = {
+  error?: string;
+  message?: string;
+};
+
 function slugify(name: string): string {
   return (
     name
@@ -76,4 +81,41 @@ export async function createGym(
 
   revalidatePath("/admin");
   return { url: `/g/${gym.slug}/admin`, email: ownerEmail };
+}
+
+export async function deleteGym(
+  gymId: number,
+  _prev: DeleteGymState,
+  _formData: FormData
+): Promise<DeleteGymState> {
+  const { user } = await requireAdmin();
+  if (!user.isSuperAdmin) return { error: "No autorizado." };
+
+  const gym = await prisma.gym.findUnique({ where: { id: gymId } });
+  if (!gym) return { error: "El gimnasio no existe." };
+
+  const counts = await prisma.$transaction(async (tx) => {
+    const payments = await tx.payment.deleteMany({ where: { gymId } });
+    const memberships = await tx.membership.deleteMany({ where: { gymId } });
+    const attendances = await tx.attendance.deleteMany({ where: { gymId } });
+    const clients = await tx.client.deleteMany({ where: { gymId } });
+    const plans = await tx.plan.deleteMany({ where: { gymId } });
+    const users = await tx.user.deleteMany({
+      where: { gymId, isSuperAdmin: false },
+    });
+    await tx.gym.delete({ where: { id: gymId } });
+    return {
+      clients: clients.count,
+      payments: payments.count,
+      memberships: memberships.count,
+      attendances: attendances.count,
+      plans: plans.count,
+      users: users.count,
+    };
+  });
+
+  revalidatePath("/admin");
+  return {
+    message: `Gimnasio "${gym.name}" eliminado: ${counts.clients} socios, ${counts.payments} pagos, ${counts.memberships} membresías, ${counts.attendances} asistencias, ${counts.plans} planes.`,
+  };
 }
