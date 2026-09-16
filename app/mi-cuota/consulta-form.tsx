@@ -4,6 +4,7 @@ import { useState, useActionState } from "react";
 import Link from "next/link";
 import { consultarSocioGlobal, type ConsultaGlobalResult } from "./actions";
 import type { ConsultaView } from "@/lib/consulta";
+import RoutineSection from "@/components/routine-section";
 
 const weights = (amount: number) =>
   amount.toLocaleString("es-AR", {
@@ -159,6 +160,7 @@ export default function ConsultaGlobalForm() {
       {state?.ok && !state.multiple && candidate && (
         <div className="mt-4">
           <ConsultaCard view={candidate} />
+          <RoutineSection routine={candidate.routine} />
         </div>
       )}
 
@@ -208,6 +210,7 @@ export default function ConsultaGlobalForm() {
             ← Elegir otro gimnasio
           </button>
           <ConsultaCard view={selected} />
+          <RoutineSection routine={selected.routine} />
         </div>
       )}
 

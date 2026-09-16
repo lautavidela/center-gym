@@ -11,6 +11,7 @@
     "db:setup": "prisma generate && prisma migrate deploy && prisma db seed",
     "db:migrate": "prisma migrate dev",
     "db:seed": "prisma db seed",
+    "db:seed:exercises": "tsx scripts/seed-exercises.ts",
     "db:studio": "prisma studio"
   },
   "prisma": {

@@ -1,4 +1,4 @@
-import type { Client, Gym, Membership, Payment, Plan } from "@prisma/client";
+import type { Client, Exercise, Gym, Membership, Payment, Plan, RoutineExercise } from "@prisma/client";
 import { daysUntil, formatDate, startOfDay } from "@/lib/dates";
 import { formatClassesLabel } from "@/lib/plans";
 
@@ -6,6 +6,7 @@ export type ClientWithDetails = Client & {
   gym: Gym;
   memberships: (Membership & { plan: Plan | null })[];
   payments: (Payment & { plan: Plan | null })[];
+  routineExercises: (RoutineExercise & { exercise: Exercise })[];
 };
 
 export const activeMembershipsArgs = {
@@ -19,6 +20,11 @@ export const recentPaymentsArgs = {
   orderBy: { paidAt: "desc" },
   take: 5,
   include: { plan: true },
+} as const;
+
+export const clientRoutineArgs = {
+  orderBy: { order: "asc" },
+  include: { exercise: true },
 } as const;
 
 export type ConsultaView = {
@@ -40,6 +46,17 @@ export type ConsultaView = {
     amount: number;
     method: string;
   }[];
+  routine: {
+    name: string;
+    gifUrl: string;
+    muscle: string | null;
+    bodyPart: string | null;
+    equipment: string | null;
+    sets: number;
+    reps: string;
+    rest: string;
+    notes: string | null;
+  }[];
 };
 
 export function buildConsultaView(client: ClientWithDetails): ConsultaView {
@@ -52,6 +69,17 @@ export function buildConsultaView(client: ClientWithDetails): ConsultaView {
     clientName: client.name,
     phone: client.phone,
     hasMembership: !!membership,
+    routine: client.routineExercises.map((r) => ({
+      name: r.exercise.name,
+      gifUrl: r.exercise.gifUrl,
+      muscle: r.exercise.muscle,
+      bodyPart: r.exercise.bodyPart,
+      equipment: r.exercise.equipment,
+      sets: r.sets,
+      reps: r.reps,
+      rest: r.rest,
+      notes: r.notes,
+    })),
     payments: client.payments.map((p) => ({
       date: formatDate(p.paidAt),
       plan: p.plan?.name ?? "—",

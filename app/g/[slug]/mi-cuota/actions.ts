@@ -4,8 +4,10 @@ import { prisma } from "@/lib/prisma";
 import {
   activeMembershipsArgs,
   buildConsultaView,
+  clientRoutineArgs,
   recentPaymentsArgs,
 } from "@/lib/consulta";
+import type { RoutineExerciseView } from "@/components/routine-section";
 
 export type ConsultaResult = {
   ok: boolean;
@@ -25,6 +27,7 @@ export type ConsultaResult = {
       amount: number;
       method: string;
     }[];
+    routine: RoutineExerciseView[];
   };
 };
 
@@ -57,6 +60,7 @@ export async function consultarSocio(
       gym: true,
       memberships: activeMembershipsArgs,
       payments: recentPaymentsArgs,
+      routineExercises: clientRoutineArgs,
     },
   });
 
@@ -87,6 +91,7 @@ export async function consultarSocio(
       status: view.status!,
       daysLeft: view.daysLeft!,
       payments: view.payments,
+      routine: view.routine,
     },
   };
 }

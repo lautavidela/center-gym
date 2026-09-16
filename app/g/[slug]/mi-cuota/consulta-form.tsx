@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import Link from "next/link";
 import { consultarSocio, type ConsultaResult } from "./actions";
+import RoutineSection from "@/components/routine-section";
 
 const weights = (amount: number) =>
   amount.toLocaleString("es-AR", {
@@ -55,7 +56,8 @@ export default function ConsultaForm({
       )}
 
       {state?.ok && state.client && (
-        <div className="mt-4 overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm">
+        <div className="mt-4">
+          <div className="overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm">
           <div className="px-5 py-4 text-center sm:px-6 sm:py-4">
             <p className="text-xs font-bold uppercase tracking-wide text-zinc-400">
               Gimnasio: {gymName}
@@ -126,6 +128,9 @@ export default function ConsultaForm({
               </ul>
             </div>
           )}
+          </div>
+
+          <RoutineSection routine={state.client.routine} />
         </div>
       )}
 

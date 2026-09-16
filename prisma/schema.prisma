@@ -19,6 +19,7 @@ model Gym {
   memberships Membership[]
   payments    Payment[]
   attendances Attendance[]
+  routineExercises RoutineExercise[]
 }
 
 model User {
@@ -60,8 +61,38 @@ model Client {
   memberships Membership[]
   payments    Payment[]
   attendances Attendance[]
+  routineExercises RoutineExercise[]
 
   @@unique([gymId, dni])
+}
+
+model Exercise {
+  id           String            @id
+  name         String
+  muscle       String?
+  bodyPart     String?
+  equipment    String?
+  gifUrl       String
+  instructions String?
+  routines     RoutineExercise[]
+}
+
+model RoutineExercise {
+  id         Int      @id @default(autoincrement())
+  gymId      Int
+  gym        Gym      @relation(fields: [gymId], references: [id], onDelete: Cascade)
+  clientId   Int
+  client     Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  exerciseId String
+  exercise   Exercise @relation(fields: [exerciseId], references: [id], onDelete: Restrict)
+  sets       Int      @default(3)
+  reps       String   @default("12")
+  rest       String   @default("60")
+  notes      String?
+  order      Int      @default(0)
+  createdAt  DateTime @default(now())
+
+  @@unique([clientId, exerciseId])
 }
 
 model Membership {

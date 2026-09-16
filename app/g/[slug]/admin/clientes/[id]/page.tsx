@@ -8,6 +8,7 @@ import StatusBadge from "@/components/status-badge";
 import PaymentForm from "@/components/payment-form";
 import ManualMembershipForm from "@/components/manual-membership-form";
 import ClientActions from "@/components/client-actions";
+import ClientRoutine from "@/components/client-routine";
 
 export const metadata: Metadata = {
   title: "Cliente",
@@ -35,6 +36,10 @@ export default async function ClientePage({
       attendances: {
         orderBy: { dateTime: "desc" },
         take: 30,
+      },
+      routineExercises: {
+        orderBy: { order: "asc" },
+        include: { exercise: true },
       },
     },
   });
@@ -138,6 +143,26 @@ export default async function ClientePage({
           {!current && plans.length > 0 && (
             <ManualMembershipForm clientId={client.id} plans={plans} />
           )}
+
+          <ClientRoutine
+            clientId={client.id}
+            initialRoutines={client.routineExercises.map((r) => ({
+              id: r.id,
+              exerciseId: r.exerciseId,
+              sets: r.sets,
+              reps: r.reps,
+              rest: r.rest,
+              notes: r.notes,
+              order: r.order,
+              exercise: {
+                name: r.exercise.name,
+                muscle: r.exercise.muscle,
+                bodyPart: r.exercise.bodyPart,
+                equipment: r.exercise.equipment,
+                gifUrl: r.exercise.gifUrl,
+              },
+            }))}
+          />
 
           <section className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
             <h2 className="mb-3 text-lg font-bold">Historial de pagos</h2>

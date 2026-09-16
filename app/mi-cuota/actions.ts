@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import {
   activeMembershipsArgs,
   buildConsultaView,
+  clientRoutineArgs,
   recentPaymentsArgs,
   type ConsultaView,
 } from "@/lib/consulta";
@@ -33,6 +34,7 @@ export async function consultarSocioGlobal(
       gym: true,
       memberships: activeMembershipsArgs,
       payments: recentPaymentsArgs,
+      routineExercises: clientRoutineArgs,
     },
   });
 
