@@ -23,9 +23,9 @@ export const recentPaymentsArgs = {
 } as const;
 
 export const clientRoutineArgs = {
-  orderBy: { order: "asc" },
+  orderBy: [{ day: "asc" as const }, { order: "asc" as const }],
   include: { exercise: true },
-} as const;
+};
 
 export type ConsultaView = {
   gymId: number;
@@ -47,6 +47,7 @@ export type ConsultaView = {
     method: string;
   }[];
   routine: {
+    day: number;
     name: string;
     gifUrl: string;
     muscle: string | null;
@@ -70,6 +71,7 @@ export function buildConsultaView(client: ClientWithDetails): ConsultaView {
     phone: client.phone,
     hasMembership: !!membership,
     routine: client.routineExercises.map((r) => ({
+      day: r.day,
       name: r.exercise.name,
       gifUrl: r.exercise.gifUrl,
       muscle: r.exercise.muscle,

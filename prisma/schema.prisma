@@ -85,6 +85,7 @@ model RoutineExercise {
   client     Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
   exerciseId String
   exercise   Exercise @relation(fields: [exerciseId], references: [id], onDelete: Restrict)
+  day        Int      @default(0)
   sets       Int      @default(3)
   reps       String   @default("12")
   rest       String   @default("60")
@@ -92,7 +93,7 @@ model RoutineExercise {
   order      Int      @default(0)
   createdAt  DateTime @default(now())
 
-  @@unique([clientId, exerciseId])
+  @@unique([clientId, day, exerciseId])
 }
 
 model Membership {

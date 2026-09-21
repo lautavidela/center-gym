@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { computeStatus } from "@/lib/status";
@@ -8,7 +9,7 @@ import StatusBadge from "@/components/status-badge";
 import PaymentForm from "@/components/payment-form";
 import ManualMembershipForm from "@/components/manual-membership-form";
 import ClientActions from "@/components/client-actions";
-import ClientRoutine from "@/components/client-routine";
+import { adminPath } from "@/lib/gyms";
 
 export const metadata: Metadata = {
   title: "Cliente",
@@ -38,7 +39,7 @@ export default async function ClientePage({
         take: 30,
       },
       routineExercises: {
-        orderBy: { order: "asc" },
+        orderBy: [{ day: "asc" }, { order: "asc" }],
         include: { exercise: true },
       },
     },
@@ -144,25 +145,20 @@ export default async function ClientePage({
             <ManualMembershipForm clientId={client.id} plans={plans} />
           )}
 
-          <ClientRoutine
-            clientId={client.id}
-            initialRoutines={client.routineExercises.map((r) => ({
-              id: r.id,
-              exerciseId: r.exerciseId,
-              sets: r.sets,
-              reps: r.reps,
-              rest: r.rest,
-              notes: r.notes,
-              order: r.order,
-              exercise: {
-                name: r.exercise.name,
-                muscle: r.exercise.muscle,
-                bodyPart: r.exercise.bodyPart,
-                equipment: r.exercise.equipment,
-                gifUrl: r.exercise.gifUrl,
-              },
-            }))}
-          />
+          <Link
+            href={adminPath(slug, `/rutinas/${client.id}`)}
+            className="block rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm transition hover:border-emerald-300 hover:bg-emerald-50"
+          >
+            <h2 className="text-lg font-bold">Rutina del socio</h2>
+            <p className="text-sm text-zinc-500">
+              {client.routineExercises.length === 0
+                ? "Todavía no tiene rutina armada."
+                : `${client.routineExercises.length} ejercicio${client.routineExercises.length === 1 ? "" : "s"} en ${new Set(client.routineExercises.map((r) => r.day)).size} día${new Set(client.routineExercises.map((r) => r.day)).size === 1 ? "" : "s"}.`}
+            </p>
+            <span className="mt-2 inline-block rounded-lg bg-emerald-600 px-3 py-1.5 text-sm font-medium text-white">
+              Ver / editar rutina →
+            </span>
+          </Link>
 
           <section className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
             <h2 className="mb-3 text-lg font-bold">Historial de pagos</h2>

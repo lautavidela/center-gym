@@ -1,0 +1,17 @@
+
+> mtgym@0.1.0 dev
+> next dev
+
+▲ Next.js 16.3.4 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://172.22.128.1:3000
+- Environments: .env
+✓ Ready in 857ms
+✓ Running next.config.ts took 58ms
+- Experiments (use with caution):
+  · serverActions
+
+ GET /g/center-gym/admin/rutinas 200 in 2.7s (next.js: 1296ms, application-code: 1433ms)
+ GET /g/center-gym/admin/rutinas/40 200 in 1383ms (next.js: 972ms, application-code: 411ms)
+ GET /g/center-gym/admin/clientes/40 200 in 1727ms (next.js: 784ms, application-code: 943ms)
+ GET /mi-cuota?dni=46397442 200 in 99ms (next.js: 37ms, application-code: 62ms)

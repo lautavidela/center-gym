@@ -3,14 +3,22 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireGymAdmin } from "@/lib/auth";
+import { isValidDay } from "@/lib/routines";
 
 function revalidateRoutine(gymSlug: string, clientId: number) {
   revalidatePath(`/g/${gymSlug}/admin/clientes`);
   revalidatePath(`/g/${gymSlug}/admin/clientes/${clientId}`);
+  revalidatePath(`/g/${gymSlug}/admin/rutinas`);
+  revalidatePath(`/g/${gymSlug}/admin/rutinas/${clientId}`);
 }
 
-export async function addRoutineExercise(clientId: number, exerciseId: string) {
+export async function addRoutineExercise(
+  clientId: number,
+  exerciseId: string,
+  day: number
+) {
   const { gym, gymId } = await requireGymAdmin();
+  if (!isValidDay(day)) return;
 
   const owned = await prisma.client.findFirst({ where: { id: clientId, gymId } });
   if (!owned) return;
@@ -19,12 +27,12 @@ export async function addRoutineExercise(clientId: number, exerciseId: string) {
   if (!exercise) return;
 
   const existing = await prisma.routineExercise.findFirst({
-    where: { clientId, gymId, exerciseId },
+    where: { clientId, gymId, exerciseId, day },
   });
   if (existing) return;
 
   const last = await prisma.routineExercise.aggregate({
-    where: { clientId, gymId },
+    where: { clientId, gymId, day },
     _max: { order: true },
   });
 
@@ -33,6 +41,7 @@ export async function addRoutineExercise(clientId: number, exerciseId: string) {
       clientId,
       gymId,
       exerciseId,
+      day,
       sets: 3,
       reps: "12",
       rest: "60",
@@ -54,7 +63,7 @@ export async function removeRoutineExercise(routineId: number) {
   await prisma.routineExercise.delete({ where: { id: routineId } });
 
   const siblings = await prisma.routineExercise.findMany({
-    where: { clientId: routine.clientId, gymId },
+    where: { clientId: routine.clientId, gymId, day: routine.day },
     orderBy: { order: "asc" },
   });
   await prisma.$transaction(
@@ -107,7 +116,7 @@ export async function moveRoutineExercise(
   if (!routine) return;
 
   const siblings = await prisma.routineExercise.findMany({
-    where: { clientId: routine.clientId, gymId },
+    where: { clientId: routine.clientId, gymId, day: routine.day },
     orderBy: { order: "asc" },
   });
 

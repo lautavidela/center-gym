@@ -9,6 +9,7 @@ const navItems = [
   { sub: "/clientes", label: "Clientes", icon: "👥" },
   { sub: "/asistencias", label: "Asistencias", icon: "✓" },
   { sub: "/vencimientos", label: "Vencimientos", icon: "⏰" },
+  { sub: "/rutinas", label: "Rutinas", icon: "📅" },
   { sub: "/ingresos", label: "Ingresos", icon: "📈" },
   { sub: "/planes", label: "Planes", icon: "🏋" },
   { sub: "/migracion", label: "Migración", icon: "⇅" },
