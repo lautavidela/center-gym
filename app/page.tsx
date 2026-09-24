@@ -175,27 +175,12 @@ export default function Home() {
   return (
     <main className="flex min-h-full flex-1 flex-col">
       <header className="sticky top-0 z-20 border-b border-zinc-200/70 bg-white/80 backdrop-blur">
-        <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-3 px-4 py-4">
+        <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-4">
           <div className="flex items-center gap-2">
             <Brand />
-            <p className="hidden text-xl font-black tracking-tight sm:block">
+            <p className="text-xl font-black tracking-tight">
               <span className="text-emerald-600">MT</span>Gym
             </p>
-          </div>
-          <div className="flex items-center gap-2 sm:gap-3">
-            <Link
-              href="/mi-cuota"
-              className="rounded-xl border border-zinc-300 px-3 py-2 text-sm font-semibold text-zinc-600 transition hover:border-emerald-300 hover:text-emerald-700 sm:px-4"
-            >
-              Mi cuota
-            </Link>
-            <span className="text-sm font-medium text-zinc-500">Para dueños</span>
-            <Link
-              href="/login"
-              className="rounded-xl border border-emerald-600 px-3 py-2 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-600 hover:text-white sm:px-4"
-            >
-              Iniciar sesión
-            </Link>
           </div>
         </div>
       </header>
@@ -378,11 +363,6 @@ export default function Home() {
                 <li>
                   <Link href="/mi-cuota" className="text-zinc-600 hover:text-emerald-600">
                     Consultar tu cuota
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/login" className="text-zinc-600 hover:text-emerald-600">
-                    Iniciar sesión
                   </Link>
                 </li>
                 <li>
