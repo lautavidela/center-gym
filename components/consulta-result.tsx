@@ -380,9 +380,8 @@ function ChangePin({
         <button
           type="button"
           onClick={() => setOpen(true)}
-          className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl border border-emerald-300 bg-emerald-50 px-4 py-2.5 font-semibold text-emerald-700 transition hover:bg-emerald-100"
+          className="mt-4 flex w-full items-center justify-center rounded-xl border border-emerald-300 bg-emerald-50 px-4 py-2.5 font-semibold text-emerald-700 transition hover:bg-emerald-100"
         >
-          <span aria-hidden="true" className="text-base leading-none">🔑</span>
           Cambiar mi PIN
         </button>
       </>
