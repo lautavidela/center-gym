@@ -47,7 +47,9 @@ export type ConsultaView = {
     method: string;
   }[];
   routine: {
+    id: number;
     day: number;
+    exerciseId: string;
     name: string;
     gifUrl: string;
     muscle: string | null;
@@ -57,6 +59,7 @@ export type ConsultaView = {
     reps: string;
     rest: string;
     notes: string | null;
+    order: number;
   }[];
 };
 
@@ -71,7 +74,9 @@ export function buildConsultaView(client: ClientWithDetails): ConsultaView {
     phone: client.phone,
     hasMembership: !!membership,
     routine: client.routineExercises.map((r) => ({
+      id: r.id,
       day: r.day,
+      exerciseId: r.exerciseId,
       name: r.exercise.name,
       gifUrl: r.exercise.gifUrl,
       muscle: r.exercise.muscle,
@@ -81,6 +86,7 @@ export function buildConsultaView(client: ClientWithDetails): ConsultaView {
       reps: r.reps,
       rest: r.rest,
       notes: r.notes,
+      order: r.order,
     })),
     payments: client.payments.map((p) => ({
       date: formatDate(p.paidAt),

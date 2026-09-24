@@ -1,4 +1,4 @@
-import { randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
+import { randomBytes, randomInt, scryptSync, timingSafeEqual } from "node:crypto";
 
 export function hashPassword(password: string): string {
   const salt = randomBytes(16).toString("hex");
@@ -14,4 +14,12 @@ export function verifyPassword(password: string, stored: string): boolean {
   const hash = scryptSync(password, salt, keylen);
   const expected = Buffer.from(expectedHash, "hex");
   return hash.length === expected.length && timingSafeEqual(hash, expected);
+}
+
+export function isValidPin(pin: string): boolean {
+  return /^\d{4}$/.test(pin);
+}
+
+export function generateEmailCode(): string {
+  return String(randomInt(0, 1_000_000)).padStart(6, "0");
 }

@@ -55,14 +55,19 @@ export async function createClient(
   const dni = parseDni(formData.get("dni"));
   const name = String(formData.get("name") ?? "").trim();
   const phone = String(formData.get("phone") ?? "").trim() || null;
-  const email = String(formData.get("email") ?? "").trim() || null;
+  const email = String(formData.get("email") ?? "").trim();
   const notes = String(formData.get("notes") ?? "").trim() || null;
   const planRaw = String(formData.get("planId") ?? "").trim();
+
+  const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   if (!name) return { error: "El nombre es obligatorio." };
   if (!dni) return { error: "El DNI es obligatorio." };
   if (dni.length < 6 || dni.length > 11)
     return { error: "El DNI no parece válido." };
+  if (!EMAIL_RE.test(email)) {
+    return { error: "El email es obligatorio y debe ser válido." };
+  }
 
   const existing = await prisma.client.findFirst({
     where: { gymId, dni },
@@ -95,11 +100,16 @@ export async function updateClient(
   const dni = parseDni(formData.get("dni"));
   const name = String(formData.get("name") ?? "").trim();
   const phone = String(formData.get("phone") ?? "").trim() || null;
-  const email = String(formData.get("email") ?? "").trim() || null;
+  const email = String(formData.get("email") ?? "").trim();
   const notes = String(formData.get("notes") ?? "").trim() || null;
+
+  const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   if (!name) return { error: "El nombre es obligatorio." };
   if (!dni) return { error: "El DNI es obligatorio." };
+  if (!EMAIL_RE.test(email)) {
+    return { error: "El email es obligatorio y debe ser válido." };
+  }
 
   const owned = await prisma.client.findFirst({
     where: { id, gymId },
