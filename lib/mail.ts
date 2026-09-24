@@ -16,7 +16,13 @@ const transporter = smtpConfigured
     })
   : null;
 
-export async function sendCodeEmail(opts: { to: string; gymName: string; code: string }) {
+export type SendCodeEmailResult = { ok: true; dev: boolean } | { ok: false; error: string };
+
+export async function sendCodeEmail(opts: {
+  to: string;
+  gymName: string;
+  code: string;
+}): Promise<SendCodeEmailResult> {
   const subject = `${opts.gymName}: tu código de verificación`;
   const text = `Tu código de verificación para ${opts.gymName} es: ${opts.code}.
 

@@ -14,9 +14,11 @@ import { generateEmailCode, hashPassword, isValidPin, verifyPassword } from "@/l
 const CODE_TTL_MS = 10 * 60 * 1000;
 const MAX_ATTEMPTS = 5;
 const LOCK_MS = 60 * 1000;
+const SEND_COOLDOWN_MS = 60 * 1000;
 
 type Attempts = { fails: number; lockedUntil: number };
 const pinAttempts = new Map<string, Attempts>();
+const sendCooldowns = new Map<string, number>();
 
 function throttleKey(gymId: number, dni: string) {
   return `${gymId}:${dni}`;
@@ -50,7 +52,24 @@ async function getGym(gymId: number) {
   return prisma.gym.findUnique({ where: { id: gymId } });
 }
 
-async function issueCode(gymId: number, clientId: number, purpose: string, to: string, gymName: string) {
+type IssueCodeResult =
+  | { ok: true; dev: boolean }
+  | { ok: false; cooldown: true; remaining: number }
+  | { ok: false; error?: string; dev?: boolean };
+
+async function issueCode(
+  gymId: number,
+  clientId: number,
+  purpose: string,
+  to: string,
+  gymName: string
+): Promise<IssueCodeResult> {
+  const cooldownKey = `${gymId}:${clientId}`;
+  const lastSent = sendCooldowns.get(cooldownKey);
+  if (lastSent && Date.now() - lastSent < SEND_COOLDOWN_MS) {
+    const remaining = Math.ceil((SEND_COOLDOWN_MS - (Date.now() - lastSent)) / 1000);
+    return { ok: false, cooldown: true, remaining };
+  }
   const code = generateEmailCode();
   const codeHash = hashPassword(code);
   const expiresAt = new Date(Date.now() + CODE_TTL_MS);
@@ -63,7 +82,14 @@ async function issueCode(gymId: number, clientId: number, purpose: string, to: s
   await prisma.emailCode.create({
     data: { gymId, clientId, purpose, codeHash, expiresAt },
   });
+  sendCooldowns.set(cooldownKey, Date.now());
   return sendCodeEmail({ to, gymName, code });
+}
+
+function cooldownMessage(sent: IssueCodeResult) {
+  if ("cooldown" in sent)
+    return `Esperá ${sent.remaining} segundo${sent.remaining === 1 ? "" : "s"} antes de pedir otro código.`;
+  return null;
 }
 
 async function verifyCode(gymId: number, clientId: number, purpose: string, code: string) {
@@ -132,7 +158,9 @@ export async function buscarSocioGlobal(
   };
 }
 
-export type PinActionResult = { ok: true; dev?: boolean } | { ok: false; message: string };
+export type PinActionResult =
+  | { ok: true; dev?: boolean }
+  | { ok: false; message: string; cooldown?: boolean; remaining?: number };
 
 export async function solicitarCodigoCrearPin(
   gymId: number,
@@ -148,7 +176,9 @@ export async function solicitarCodigoCrearPin(
     return { ok: false, message: "Este socio no tiene email cargado. Pedíselo a la administración." };
 
   const sent = await issueCode(gym.id, client.id, "crear-pin", client.email, gym.name);
-  if (!sent.ok) return { ok: false, message: "No se pudo enviar el código. Intentalo de nuevo." };
+  if (!sent.ok) {
+    return { ok: false, message: cooldownMessage(sent) ?? "No se pudo enviar el código. Intentalo de nuevo." };
+  }
   return { ok: true, dev: sent.dev };
 }
 
@@ -235,7 +265,9 @@ export async function solicitarCodigoCambiarPin(
     return { ok: false, message: "Este socio no tiene email cargado. Pedíselo a la administración." };
 
   const sent = await issueCode(gym.id, client.id, "cambiar-pin", client.email, gym.name);
-  if (!sent.ok) return { ok: false, message: "No se pudo enviar el código. Intentalo de nuevo." };
+  if (!sent.ok) {
+    return { ok: false, message: cooldownMessage(sent) ?? "No se pudo enviar el código. Intentalo de nuevo." };
+  }
   return { ok: true, dev: sent.dev };
 }
 
@@ -255,6 +287,51 @@ export async function confirmarCambiarPin(
     return { ok: false, message: "El PIN debe tener exactamente 4 dígitos numéricos." };
 
   const verified = await verifyCode(gym.id, client.id, "cambiar-pin", code);
+  if (!verified) return { ok: false, message: "El código es incorrecto o está vencido." };
+
+  await prisma.client.update({
+    where: { id: client.id },
+    data: { pinHash: hashPassword(newPin) },
+  });
+  return { ok: true };
+}
+
+export async function solicitarCodigoResetPin(
+  gymId: number,
+  rawDni: string
+): Promise<PinActionResult> {
+  const gym = await getGym(gymId);
+  if (!gym) return { ok: false, message: "Gimnasio inválido." };
+
+  const client = await findClient(gymId, rawDni);
+  if (!client) return { ok: false, message: "No encontramos un socio con ese DNI." };
+  if (!client.pinHash) return { ok: false, message: "Todavía no creaste tu PIN." };
+  if (!client.email)
+    return { ok: false, message: "Este socio no tiene email cargado. Pedíselo a la administración." };
+
+  const sent = await issueCode(gym.id, client.id, "reset-pin", client.email, gym.name);
+  if (!sent.ok) {
+    return { ok: false, message: cooldownMessage(sent) ?? "No se pudo enviar el código. Intentalo de nuevo." };
+  }
+  return { ok: true, dev: sent.dev };
+}
+
+export async function confirmarResetPin(
+  gymId: number,
+  rawDni: string,
+  code: string,
+  newPin: string
+): Promise<PinActionResult> {
+  const gym = await getGym(gymId);
+  if (!gym) return { ok: false, message: "Gimnasio inválido." };
+
+  const client = await findClient(gymId, rawDni);
+  if (!client) return { ok: false, message: "No encontramos un socio con ese DNI." };
+  if (!client.pinHash) return { ok: false, message: "Todavía no creaste tu PIN." };
+  if (!isValidPin(newPin))
+    return { ok: false, message: "El PIN debe tener exactamente 4 dígitos numéricos." };
+
+  const verified = await verifyCode(gym.id, client.id, "reset-pin", code);
   if (!verified) return { ok: false, message: "El código es incorrecto o está vencido." };
 
   await prisma.client.update({

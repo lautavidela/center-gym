@@ -4,12 +4,15 @@ import { useState, useTransition } from "react";
 import type { ConsultaView } from "@/lib/consulta";
 import RoutineSection from "@/components/routine-section";
 import RoutineSelfEditor from "@/components/routine-self-editor";
+import PinSetup from "@/components/pin-setup";
 import {
   confirmarCambiarPin,
   confirmarCrearPin,
+  confirmarResetPin,
   ingresarPin,
   solicitarCodigoCambiarPin,
   solicitarCodigoCrearPin,
+  solicitarCodigoResetPin,
 } from "@/app/actions/cliente-pin";
 
 const weights = (amount: number) =>
@@ -127,10 +130,8 @@ function PinGate({
   onUnlock: (view: ConsultaView, pin: string) => void;
   onReset: () => void;
 }) {
-  const [mode, setMode] = useState<"enter" | "create">(hasPin ? "enter" : "create");
+  const [mode, setMode] = useState<"enter" | "create" | "reset">(hasPin ? "enter" : "create");
   const [pin, setPin] = useState("");
-  const [pin2, setPin2] = useState("");
-  const [code, setCode] = useState("");
   const [message, setMessage] = useState<string | null>(null);
   const [info, setInfo] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -153,49 +154,23 @@ function PinGate({
     });
   };
 
-  const handleSendCreate = () => {
+  const reenter = () => {
+    setMode("enter");
+    setPin("");
     setMessage(null);
     setInfo(null);
-    startTransition(async () => {
-      const res = await solicitarCodigoCrearPin(gymId, dni);
-      if (!res.ok) {
-        setMessage(res.message);
-        return;
-      }
-      setInfo(
-        res.dev
-          ? "Enviado a la consola del servidor (modo desarrollo)."
-          : "Te enviamos un código por email. Revisá tu correo."
-      );
-    });
   };
 
-  const handleConfirmCreate = () => {
-    if (pin !== pin2) {
-      setMessage("Los PIN no coinciden.");
-      return;
-    }
-    if (pin.length !== 4) {
-      setMessage("El PIN tiene 4 dígitos.");
-      return;
-    }
-    if (code.length !== 6) {
-      setMessage("El código tiene 6 dígitos.");
-      return;
-    }
-    setMessage(null);
-    setInfo(null);
+  const autoLogin = (createdPin: string) => {
     startTransition(async () => {
-      const res = await confirmarCrearPin(gymId, dni, code, pin);
-      if (!res.ok) {
-        setMessage(res.message);
+      const res = await ingresarPin(gymId, dni, createdPin);
+      if (res.ok) {
+        onUnlock(res.view, createdPin);
         return;
       }
-      setMode("enter");
-      setPin("");
-      setPin2("");
-      setCode("");
-      setInfo("PIN creado. Ahora ingresalo para ver tus datos.");
+      if (res.locked) setMessage("Demasiados intentos. Esperá un minuto.");
+      else setMessage(res.message);
+      reenter();
     });
   };
 
@@ -245,59 +220,40 @@ function PinGate({
           >
             {isPending ? "…" : "Entrar"}
           </button>
+          <button
+            type="button"
+            onClick={() => setMode("reset")}
+            className="mt-3 w-full text-center text-sm font-medium text-emerald-600 hover:text-emerald-700"
+          >
+            ¿Olvidaste tu PIN?
+          </button>
         </div>
       )}
 
       {mode === "create" && (
-        <div className="mt-4">
-          <button
-            type="button"
-            disabled={isPending}
-            onClick={handleSendCreate}
-            className="w-full rounded-xl border border-emerald-300 bg-emerald-50 px-4 py-3 font-semibold text-emerald-700 transition hover:bg-emerald-100 disabled:opacity-50"
-          >
-            {isPending ? "…" : "Enviarme el código por email"}
-          </button>
-          <div className="mt-3 grid gap-3">
-            <input
-              type="text"
-              inputMode="numeric"
-              maxLength={6}
-              value={code}
-              onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
-              placeholder="Código de 6 dígitos"
-              className="w-full rounded-xl border border-zinc-300 px-3 py-2 text-center text-lg tracking-[0.3em] outline-none focus:ring-2 focus:ring-emerald-500"
-            />
-            <div className="grid grid-cols-2 gap-3">
-              <input
-                type="password"
-                inputMode="numeric"
-                maxLength={4}
-                value={pin}
-                onChange={(e) => setPin(e.target.value.replace(/\D/g, ""))}
-                placeholder="Nuevo PIN ●●●●"
-                className="w-full rounded-xl border border-zinc-300 px-3 py-2 text-center outline-none focus:ring-2 focus:ring-emerald-500"
-              />
-              <input
-                type="password"
-                inputMode="numeric"
-                maxLength={4}
-                value={pin2}
-                onChange={(e) => setPin2(e.target.value.replace(/\D/g, ""))}
-                placeholder="Repetí el PIN"
-                className="w-full rounded-xl border border-zinc-300 px-3 py-2 text-center outline-none focus:ring-2 focus:ring-emerald-500"
-              />
-            </div>
-            <button
-              type="button"
-              disabled={isPending}
-              onClick={handleConfirmCreate}
-              className="w-full rounded-xl bg-emerald-600 px-4 py-3 font-semibold text-white transition hover:bg-emerald-700 disabled:opacity-50"
-            >
-              {isPending ? "…" : "Crear PIN"}
-            </button>
-          </div>
-        </div>
+        <PinSetup
+          title="Crear tu PIN"
+          description="Elegí tu PIN de 4 dígitos. Primero crealo y después confirmá con el código que te llega por email."
+          confirmLabel="Crear PIN"
+          send={async () => solicitarCodigoCrearPin(gymId, dni)}
+          confirm={async ({ pin: p, code }) => confirmarCrearPin(gymId, dni, code, p)}
+          onSuccess={autoLogin}
+          onBack={onReset}
+          cancelLabel="← Cambiar DNI"
+        />
+      )}
+
+      {mode === "reset" && (
+        <PinSetup
+          title="Restablecer tu PIN"
+          description="Elegí tu PIN nuevo. Primero crealo y después confirmá con el código que te llega por email."
+          confirmLabel="Restablecer PIN"
+          send={async () => solicitarCodigoResetPin(gymId, dni)}
+          confirm={async ({ pin: p, code }) => confirmarResetPin(gymId, dni, code, p)}
+          onSuccess={autoLogin}
+          onBack={reenter}
+          cancelLabel="← Volver"
+        />
       )}
     </div>
   );
@@ -313,66 +269,12 @@ function ChangePin({
   onChanged: (newPin: string) => void;
 }) {
   const [open, setOpen] = useState(false);
-  const [current, setCurrent] = useState("");
-  const [newPin, setNewPin] = useState("");
-  const [newPin2, setNewPin2] = useState("");
-  const [code, setCode] = useState("");
-  const [message, setMessage] = useState<string | null>(null);
   const [info, setInfo] = useState<string | null>(null);
-  const [isPending, startTransition] = useTransition();
-
-  const sendCode = () => {
-    setMessage(null);
-    setInfo(null);
-    startTransition(async () => {
-      const res = await solicitarCodigoCambiarPin(gymId, dni, current);
-      if (!res.ok) {
-        setMessage(res.message);
-        return;
-      }
-      setInfo(
-        res.dev
-          ? "Enviado a la consola del servidor (modo desarrollo)."
-          : "Te enviamos un código por email. Revisá tu correo."
-      );
-    });
-  };
-
-  const confirm = () => {
-    if (newPin !== newPin2) {
-      setMessage("Los PIN no coinciden.");
-      return;
-    }
-    if (newPin.length !== 4) {
-      setMessage("El PIN tiene 4 dígitos.");
-      return;
-    }
-    if (code.length !== 6) {
-      setMessage("El código tiene 6 dígitos.");
-      return;
-    }
-    setMessage(null);
-    setInfo(null);
-    startTransition(async () => {
-      const res = await confirmarCambiarPin(gymId, dni, code, newPin);
-      if (!res.ok) {
-        setMessage(res.message);
-        return;
-      }
-      setOpen(false);
-      setCurrent("");
-      setNewPin("");
-      setNewPin2("");
-      setCode("");
-      setInfo("PIN actualizado.");
-      onChanged(newPin);
-    });
-  };
 
   if (!open) {
     return (
       <>
-        {info && !message && (
+        {info && !open && (
           <p className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
             {info}
           </p>
@@ -390,80 +292,21 @@ function ChangePin({
 
   return (
     <div className="mt-4 rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
-      <p className="text-sm font-semibold text-zinc-700">Cambiar mi PIN</p>
-      {message && (
-        <p className="mt-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
-          {message}
-        </p>
-      )}
-      {info && (
-        <p className="mt-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">
-          {info}
-        </p>
-      )}
-      <input
-        type="password"
-        inputMode="numeric"
-        maxLength={4}
-        value={current}
-        onChange={(e) => setCurrent(e.target.value.replace(/\D/g, ""))}
-        placeholder="PIN actual"
-        className="mt-3 w-full rounded-xl border border-zinc-300 px-3 py-2 text-center outline-none focus:ring-2 focus:ring-emerald-500"
+      <PinSetup
+        title="Cambiar mi PIN"
+        description="Elegí tu PIN nuevo. Primero crealo y después confirmá con el código que te llega por email."
+        confirmLabel="Confirmar cambio"
+        extraFields={[{ key: "current", label: "PIN actual", placeholder: "PIN actual" }]}
+        send={async ({ extra }) => solicitarCodigoCambiarPin(gymId, dni, extra.current ?? "")}
+        confirm={async ({ pin: p, code }) => confirmarCambiarPin(gymId, dni, code, p)}
+        onSuccess={(newPin) => {
+          setOpen(false);
+          setInfo("PIN actualizado.");
+          onChanged(newPin);
+        }}
+        onBack={() => setOpen(false)}
+        cancelLabel="Cancelar"
       />
-      <button
-        type="button"
-        disabled={isPending || current.length !== 4}
-        onClick={sendCode}
-        className="mt-2 w-full rounded-xl border border-emerald-300 bg-emerald-50 px-4 py-2 font-semibold text-emerald-700 transition hover:bg-emerald-100 disabled:opacity-50"
-      >
-        {isPending ? "…" : "Enviarme el código"}
-      </button>
-      <div className="mt-3 grid gap-3">
-        <input
-          type="text"
-          inputMode="numeric"
-          maxLength={6}
-          value={code}
-          onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
-          placeholder="Código de 6 dígitos"
-          className="w-full rounded-xl border border-zinc-300 px-3 py-2 text-center outline-none focus:ring-2 focus:ring-emerald-500"
-        />
-        <div className="grid grid-cols-2 gap-3">
-          <input
-            type="password"
-            inputMode="numeric"
-            maxLength={4}
-            value={newPin}
-            onChange={(e) => setNewPin(e.target.value.replace(/\D/g, ""))}
-            placeholder="Nuevo PIN"
-            className="w-full rounded-xl border border-zinc-300 px-3 py-2 text-center outline-none focus:ring-2 focus:ring-emerald-500"
-          />
-          <input
-            type="password"
-            inputMode="numeric"
-            maxLength={4}
-            value={newPin2}
-            onChange={(e) => setNewPin2(e.target.value.replace(/\D/g, ""))}
-            placeholder="Repetilo"
-            className="w-full rounded-xl border border-zinc-300 px-3 py-2 text-center outline-none focus:ring-2 focus:ring-emerald-500"
-          />
-        </div>
-        <button
-          type="button"
-          disabled={isPending}
-          onClick={confirm}
-          className="w-full rounded-xl bg-emerald-600 px-4 py-2 font-semibold text-white transition hover:bg-emerald-700 disabled:opacity-50"
-        >
-          {isPending ? "…" : "Confirmar cambio"}
-        </button>
-        <button
-          type="button"
-          onClick={() => setOpen(false)}
-          className="text-sm text-zinc-500 hover:text-zinc-700"
-        >
-          Cancelar
-        </button>
-      </div>
     </div>
   );
 }
