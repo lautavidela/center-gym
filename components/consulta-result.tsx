@@ -310,7 +310,7 @@ function ChangePin({
 }: {
   gymId: number;
   dni: string;
-  onChanged: () => void;
+  onChanged: (newPin: string) => void;
 }) {
   const [open, setOpen] = useState(false);
   const [current, setCurrent] = useState("");
@@ -365,20 +365,27 @@ function ChangePin({
       setNewPin2("");
       setCode("");
       setInfo("PIN actualizado.");
-      onChanged();
+      onChanged(newPin);
     });
   };
 
   if (!open) {
     return (
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl border border-emerald-300 bg-emerald-50 px-4 py-2.5 font-semibold text-emerald-700 transition hover:bg-emerald-100"
-      >
-        <span aria-hidden="true" className="text-base leading-none">🔑</span>
-        Cambiar mi PIN
-      </button>
+      <>
+        {info && !message && (
+          <p className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+            {info}
+          </p>
+        )}
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl border border-emerald-300 bg-emerald-50 px-4 py-2.5 font-semibold text-emerald-700 transition hover:bg-emerald-100"
+        >
+          <span aria-hidden="true" className="text-base leading-none">🔑</span>
+          Cambiar mi PIN
+        </button>
+      </>
     );
   }
 
@@ -538,7 +545,7 @@ export default function ConsultaResult({
       {tab === "mensualidad" && (
         <>
           <MembershipCard view={view} gymName={gymName} />
-          <ChangePin gymId={gymId} dni={dni} onChanged={onReset} />
+          <ChangePin gymId={gymId} dni={dni} onChanged={(newPin) => setPin(newPin)} />
         </>
       )}
 

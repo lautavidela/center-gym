@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireGymAdmin } from "@/lib/auth";
 import { addMonths, parseDni, parseExcelDate, startOfDay } from "@/lib/dates";
+import { isValidEmail, suggestEmailFix } from "@/lib/email";
 
 export type ClientFormState = { error?: string };
 
@@ -59,14 +60,16 @@ export async function createClient(
   const notes = String(formData.get("notes") ?? "").trim() || null;
   const planRaw = String(formData.get("planId") ?? "").trim();
 
-  const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
   if (!name) return { error: "El nombre es obligatorio." };
   if (!dni) return { error: "El DNI es obligatorio." };
   if (dni.length < 6 || dni.length > 11)
     return { error: "El DNI no parece válido." };
-  if (!EMAIL_RE.test(email)) {
+  if (!isValidEmail(email)) {
     return { error: "El email es obligatorio y debe ser válido." };
+  }
+  const emailFix = suggestEmailFix(email);
+  if (emailFix) {
+    return { error: `El email parece tener un typo. ¿Quisiste decir "${emailFix}"?` };
   }
 
   const existing = await prisma.client.findFirst({
@@ -103,12 +106,14 @@ export async function updateClient(
   const email = String(formData.get("email") ?? "").trim();
   const notes = String(formData.get("notes") ?? "").trim() || null;
 
-  const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
   if (!name) return { error: "El nombre es obligatorio." };
   if (!dni) return { error: "El DNI es obligatorio." };
-  if (!EMAIL_RE.test(email)) {
+  if (!isValidEmail(email)) {
     return { error: "El email es obligatorio y debe ser válido." };
+  }
+  const emailFix = suggestEmailFix(email);
+  if (emailFix) {
+    return { error: `El email parece tener un typo. ¿Quisiste decir "${emailFix}"?` };
   }
 
   const owned = await prisma.client.findFirst({
