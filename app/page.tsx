@@ -343,12 +343,15 @@ export default function Home() {
       </section>
 
       <footer className="border-t-4 border-emerald-600 bg-white">
-        <div className="mx-auto w-full max-w-6xl px-4 py-12">
+        <div className="mx-auto w-full max-w-6xl px-4 py-12 sm:py-14">
           <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-3">
             <div>
-              <p className="text-xl font-black tracking-tight">
-                <span className="text-emerald-600">MT</span>Gym
-              </p>
+              <div className="flex items-center gap-2">
+                <Brand />
+                <p className="text-xl font-black tracking-tight">
+                  <span className="text-emerald-600">MT</span>Gym
+                </p>
+              </div>
               <p className="mt-3 text-sm leading-relaxed text-zinc-500">
                 Monitoreá tu gym: gestión de socios, cuotas, asistencias e
                 ingresos para tu gimnasio. Simple para vos y fácil para tus
@@ -361,34 +364,67 @@ export default function Home() {
               </p>
               <ul className="mt-3 space-y-2 text-sm">
                 <li>
-                  <Link href="/mi-cuota" className="text-zinc-600 hover:text-emerald-600">
+                  <Link href="/mi-cuota" className="text-zinc-600 transition hover:text-emerald-600">
                     Consultar tu cuota
                   </Link>
                 </li>
                 <li>
-                  <Link href="/admin" className="text-zinc-600 hover:text-emerald-600">
+                  <Link href="/admin" className="text-zinc-600 transition hover:text-emerald-600">
                     Panel de administración
+                  </Link>
+                </li>
+                <li>
+                  <Link href="#" className="text-zinc-600 transition hover:text-emerald-600">
+                    Comenzá a usar MTGym
                   </Link>
                 </li>
               </ul>
             </div>
             <div>
               <p className="text-sm font-bold uppercase tracking-wide text-zinc-400">
-                Sobre MTGym
+                Seguinos
               </p>
-              <ul className="mt-3 space-y-2 text-sm text-zinc-500">
-                <li>Hecha para dueños de gimnasios</li>
-                <li>Sin libretas ni planillas de papel</li>
-                <li>Multi-gimnasio desde un solo panel</li>
+              <ul className="mt-3 space-y-2 text-sm">
+                <li>
+                  <Link href="#" className="text-zinc-600 transition hover:text-emerald-600">
+                    Instagram
+                  </Link>
+                </li>
+                <li>
+                  <Link href="#" className="text-zinc-600 transition hover:text-emerald-600">
+                    WhatsApp
+                  </Link>
+                </li>
+                <li>
+                  <Link href="#" className="text-zinc-600 transition hover:text-emerald-600">
+                    X
+                  </Link>
+                </li>
               </ul>
             </div>
           </div>
-          <div className="mt-10 flex flex-col items-center justify-between gap-2 border-t border-zinc-100 pt-6 text-sm text-zinc-400 sm:flex-row">
-            <p>
-              © {new Date().getFullYear()} MTGym — Monitoreá tu gym. Todos los
-              derechos reservados.
+
+          <div className="mt-10 flex flex-col items-center justify-between gap-4 border-t border-zinc-100 pt-6 sm:flex-row">
+            <p className="text-sm text-zinc-400">
+              © {new Date().getFullYear()} MTGym — Todos los derechos reservados.
             </p>
-            <p>MTGym v0.1</p>
+            <nav
+              aria-label="Documentos legales"
+              className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-sm"
+            >
+              <Link href="/terminos" className="text-zinc-600 transition hover:text-emerald-600">
+                Términos y Condiciones
+              </Link>
+              <Link href="/privacidad" className="text-zinc-600 transition hover:text-emerald-600">
+                Política de Privacidad
+              </Link>
+              <Link href="/cookies" className="text-zinc-600 transition hover:text-emerald-600">
+                Política de Cookies
+              </Link>
+            </nav>
+            <p className="text-sm text-zinc-400">
+              Creado para gimnasios, pensado para socios.
+            </p>
           </div>
         </div>
       </footer>
